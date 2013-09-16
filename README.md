@@ -28,7 +28,7 @@ First of all in your HTML file, you need to include the CSS resource:
 		<link rel="stylesheet" href="packages/bootjack_datepicker/css/bootjack_datepicker.min.css">
 	</head>
 
-Embedded calendar
+###Embedded calendar
 
 	<div data-picker="calendar" data-date="2013/09/16" data-date-format="yyyy/MM/dd"></div>
 	
@@ -38,7 +38,7 @@ With the following global registration in Dart:
 		Dropdown.use();
 	}
 	
-Datepicker
+###Datepicker
 
 	<div class="input-group" data-picker="datepicker" 
 	  data-date="2013/09/16" data-date-format="yyyy/MM/dd">
