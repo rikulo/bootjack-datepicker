@@ -35,7 +35,7 @@ First of all in your HTML file, you need to include the CSS resource:
 With the following global registration in Dart:
 
 	void main() {
-		Dropdown.use();
+		Calendar.use();
 	}
 	
 ###Datepicker
