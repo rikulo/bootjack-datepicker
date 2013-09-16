@@ -1,0 +1,116 @@
+.calendar {
+  background: white;
+  border: 1px solid #C5C5C5;
+  font-weight: normal;
+  width: 215px;
+  padding: 2px;
+}
+
+.dropdown-menu .calendar {
+  border: none;
+}
+
+.calendar .left-icon,
+.calendar .right-icon {
+  cursor: pointer;
+  text-align: center;
+  color: #cccccc; 
+}
+
+.calendar .left-icon:hover,
+.calendar .right-icon:hover {
+  color: #c3e5f4; 
+}
+
+.calendar .title {
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  font-weight: bold;
+  color: #636363;
+}
+
+.calendar .title:hover {
+  color: #4D9CB5;
+}
+
+.calendar .cell12row span {
+  width: 25%;
+  padding: 12px 3px;
+  display: inline-block;
+  float: left;
+}
+
+.calendar .cnt {
+  table-layout: fixed;
+}
+
+.calendar .cell12row span,
+.calendar .dayrow td {
+  font-size: 11px;
+  text-align: center;
+  cursor: pointer; 
+  text-decoration: none;
+  -moz-user-select: none;
+  color: #636363; 
+}
+
+.calendar td,
+.calendar span {
+  padding: 3px 0;
+}
+
+.calendar .cell12row span:hover,
+.calendar .dayrow td:hover {
+  background: #E3F2FF;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.calendar .cell12row span.seld,
+.calendar .dayrow td.seld {
+  background: #D9EFFA; 
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.calendar td.seld:hover,
+.calendar span.seld:hover {
+  background: #C3E5F4;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.35);
+  color: #008BB6;
+}
+
+.calendar .dow th {
+  font-size: 11px;
+  text-align: center;
+}
+
+.calendar .dow .wkend,
+.calendar .dow .wkday {
+  font-weight: bold;
+}
+.calendar .dow .wkend {
+  color: #f7941d;
+}
+.calendar .dow .wkday {
+  color: #636363;
+}
+.calendar td.outside {
+  color: #AAAAAA;
+  text-shadow: none;
+}
+
+.calendar td.wkend {
+  background: #F3F3F3;
+}
+
+
