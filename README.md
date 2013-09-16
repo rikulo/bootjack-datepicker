@@ -30,7 +30,40 @@ First of all in your HTML file, you need to include the CSS resource:
 		<link rel="stylesheet" href="packages/bootjack_datepicker/css/bootjack_datepicker.min.css">
 	</head>
 
-
+Embedded calendar
+	<div data-picker="calendar" data-date="2013/09/16" data-date-format="yyyy/MM/dd"></div>
+	
+With the following global registration in Dart:
+	void main() {
+		Dropdown.use();
+	}
+	
+Datepicker
+	<div class="input-group" data-picker="datepicker" 
+	  data-date="2013/09/16" data-date-format="yyyy/MM/dd">
+		
+	  <input type="text" class="form-control">
+	  
+	  <span class="input-group-btn">
+		
+		<button class="btn btn-default dropdown-toggle" type="button" 
+		  data-toggle="dropdown" data-target="#">
+		  <span class="glyphicon glyphicon-calendar"></span>
+		</button>
+		
+		<div class="dropdown-menu" >
+		</div>
+		
+	  </span>
+	</div>
+	
+With the following global registration in Dart:
+	void main() {
+		Datepicker.use();
+	}
+	
+Check more [examples](https://github.com/rikulo/bootjack-datepicker/tree/master/example).
+	
 ##Notes to Contributors
 
 ###Test and Debug

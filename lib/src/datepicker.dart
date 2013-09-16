@@ -39,9 +39,13 @@ class Datepicker extends Base {
     if (_cal.view != Calendar.DAY) return;
     
     if (_inp != null) {
-      _updateChange();
-      if (_dropdown != null)
-        _dropdown.toggle();
+      _inp.value = _cal.date;
+      $element.trigger('change.bs.datepicker');
+      
+      if (_dropdown != null) {
+        if (e.data == null || e.data['shallClose'] != false)
+          _dropdown.toggle();
+      }
     }
   }
   
@@ -54,10 +58,6 @@ class Datepicker extends Base {
   }
   
   void onInpChange(Event e) {
-    _updateChange();
-  }
-  
-  void _updateChange() {
     String text = _inp.value;
     
     try {
@@ -93,5 +93,21 @@ class Datepicker extends Base {
   Calendar _cal;
   Dropdown _dropdown;
   InputElement _inp;
+  
+  // Data API //
+  static bool _registered = false;
+  
+  /** Register to use Scrollspy component.
+   */
+  static void use() {
+    if (_registered) return;
+    _registered = true;
+    
+    $window().on('load', (DQueryEvent e) {
+      for (Element elem in $('[data-picker="datepicker"]')) {
+        Datepicker.wire(elem);
+      }
+    });
+  }
   
 }

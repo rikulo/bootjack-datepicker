@@ -347,9 +347,11 @@ class Calendar extends Base {
   }
   
   void _shiftDate (String opt, int ofs) {
-    int y = _value.year;
-    int m = _value.month;
-    int d = _value.day;
+    DateTime val = _value != null ? _value: new DateTime.now();
+    
+    int y = val.year;
+    int m = val.month;
+    int d = val.day;
     bool nofix = false;
     switch(opt) {
     case DAY :
@@ -365,7 +367,7 @@ class Calendar extends Base {
     }
     
     value = _newDate(y, m ,d, !nofix);
-    $element.trigger('change.bs.calendar');
+    $element.trigger('change.bs.calendar', data: {'value': _value, 'shallClose': false});
   }
   
   void _changeView(MouseEvent evt) {
@@ -383,10 +385,12 @@ class Calendar extends Base {
   }
 
   void _clickDate(DQueryEvent evt) {
+    DateTime val = _value != null ? _value: new DateTime.now();
+    
     ElementQuery target = $(evt.target);
     switch (this._view) {
     case DAY:
-      _setTime(null, (_value.month + target.data.get("monofs")),  int.parse(target.html));
+      _setTime(null, (val.month + target.data.get("monofs")),  int.parse(target.html));
       _markCal();
       break;
     case MONTH:
@@ -414,7 +418,23 @@ class Calendar extends Base {
     int day = d != null ? d : val.day;
     
     value = _newDate(year, month, day, d == null);
-    $element.trigger('change.bs.calendar');
+    $element.trigger('change.bs.calendar', data: {'value': _value});
+  }
+  
+  // Data API //
+  static bool _registered = false;
+  
+  /** Register to use Scrollspy component.
+   */
+  static void use() {
+    if (_registered) return;
+    _registered = true;
+    
+    $window().on('load', (DQueryEvent e) {
+      for (Element elem in $('[data-picker="calendar"]')) {
+        Calendar.wire(elem);
+      }
+    });
   }
 }
 
