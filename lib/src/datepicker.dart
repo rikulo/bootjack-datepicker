@@ -40,7 +40,7 @@ class Datepicker extends Base {
     
     if (_inp != null) {
       _inp.value = _cal.date;
-      $element.trigger('change.bs.datepicker');
+      _updateChange();
       
       if (_dropdown != null) {
         if (e.data == null || e.data['shallClose'] != false)
@@ -58,12 +58,16 @@ class Datepicker extends Base {
   }
   
   void onInpChange(Event e) {
+    _updateChange();
+  }
+  
+  void _updateChange() {
     String text = _inp.value;
     
     try {
-     DateTime val = new DateFormat(_cal.format, _cal.locale).parse(text);
-     _clearError();
-     _cal.value = val;
+      DateTime val = new DateFormat(_cal.format, _cal.locale).parse(text);
+      _clearError();
+      _cal.value = val;
     } on FormatException catch (e) {
       _markError();
     }
