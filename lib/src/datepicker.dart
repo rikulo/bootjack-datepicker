@@ -77,6 +77,7 @@ class Datepicker extends Base {
   
   void _markError() {
     element.classes.add('has-error');
+    $element.trigger('error.bs.datepicker');
   }
   
   
