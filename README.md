@@ -3,8 +3,6 @@
 Bootjack datepicker component is a datepicker component of [Bootjack](http://github.com/rikulo/bootjack).
 
 * [Home](http://rikulo.org)
-* [Tutorial](http://blog.rikulo.org/posts/2013/May/General/bootjack-and-dquery/)
-* [API Reference](http://api.rikulo.org/bootjack/latest/)
 * [Git Repository](https://github.com/rikulo/bootjack-datepicker)
 * [Discussion](http://stackoverflow.com/questions/tagged/rikulo)
 * [Issues](https://github.com/rikulo/bootjack-datepicker/issues)
@@ -31,14 +29,17 @@ First of all in your HTML file, you need to include the CSS resource:
 	</head>
 
 Embedded calendar
+
 	<div data-picker="calendar" data-date="2013/09/16" data-date-format="yyyy/MM/dd"></div>
 	
 With the following global registration in Dart:
+
 	void main() {
 		Dropdown.use();
 	}
 	
 Datepicker
+
 	<div class="input-group" data-picker="datepicker" 
 	  data-date="2013/09/16" data-date-format="yyyy/MM/dd">
 		
@@ -58,6 +59,7 @@ Datepicker
 	</div>
 	
 With the following global registration in Dart:
+
 	void main() {
 		Datepicker.use();
 	}
