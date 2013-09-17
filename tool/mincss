@@ -39,5 +39,5 @@ for fn in $(find -name *.css) ; do
 
 	echo Compile $fn
 	dstfl=${fn%.css}.min.css
-	java -jar $jarfl --charset UTF-8 --type css $fn -o ${dstfl} 2>&1
+	java -jar $jarfl --charset UTF-8 --type css $fn -o ${dstfl}
 done
