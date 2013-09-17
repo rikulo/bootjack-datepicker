@@ -1,0 +1,43 @@
+#!/bin/bash
+# mincss
+#
+#	Purpose:
+#		Minimize Css files
+#
+#Copyright (C) 2012 Potix Corporation. All Rights Reserved.
+#
+refdir=$0
+refdir=${refdir%/*}
+if [ "$refdir" = "." ] ; then
+  refdir=".."
+elif [ "$refdir" = "${refdir%/*}" ] ; then
+  refdir="."
+else
+  refdir=${refdir%/*}
+fi
+if [ "$TERM" = "cygwin" ] || [ "$OSTYPE" = "cygwin" ] ; then
+  refdir=$(cygpath -u $refdir)
+fi
+
+jarfl=$refdir/tool/lib/yuicompressor.jar
+if [ ! -f $jarfl ] ; then
+	echo $jarfl not found
+	exit 1
+fi
+
+for fn in $(find -name *.css) ; do
+	if [ "$fn" != "${fn##*/packages/}" ] || [ "$fn" != "${fn%.min.css}" ] ; then
+		#echo Skip $fn
+		continue
+	fi
+
+	f2=${fn##*/}
+	if [ "$f2" != "${f2#_}" ] ; then
+		echo Skip $fn
+		continue
+	fi
+
+	echo Compile $fn
+	dstfl=${fn%.css}.min.css
+	java -jar $jarfl --charset UTF-8 --type css $fn -o ${dstfl} 2>&1
+done

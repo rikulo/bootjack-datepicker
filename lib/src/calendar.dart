@@ -9,7 +9,7 @@ class Calendar extends Base {
   static const String MONTH = 'month';
   static const String YEAR = 'year';
   
-  static const String _Calendar_TEMPLATE = '''
+  static const String _CALENDAR_TEMPLATE = '''
 <div class="calendar">
   <table class="cnt" width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr>
@@ -160,7 +160,7 @@ class Calendar extends Base {
       }
     }
     
-    element.innerHtml = _Calendar_TEMPLATE;
+    element.innerHtml = _CALENDAR_TEMPLATE;
     
     element.query('.title').$dom_addEventListener('click', _changeView);
     element.query('.left-icon').$dom_addEventListener('click', _clickArrow);
