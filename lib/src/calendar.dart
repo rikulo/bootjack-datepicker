@@ -10,15 +10,13 @@ class Calendar extends Base {
   static const String YEAR = 'year';
   
   static const String _CALENDAR_TEMPLATE = '''
-<div class="calendar">
-  <table class="cnt" width="100%" border="0" cellspacing="0" cellpadding="0">
-    <tr>
-      <th class="left-icon">&laquo;</th>
-      <th class="title" colspan="5"></th>
-      <th class="right-icon">&raquo;</th>
-    </tr>
-  </table>
-</div>
+<table class="cnt" width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <th class="left-icon">&laquo;</th>
+    <th class="title" colspan="5"></th>
+    <th class="right-icon">&raquo;</th>
+  </tr>
+</table>
 ''';
   static const String _DOW_TEMPLATE = '''
 <tr class="dow">
@@ -86,7 +84,6 @@ class Calendar extends Base {
    * 
    */
   String _view;
-  String get view => _view;
   
   /**
    * 
@@ -136,17 +133,38 @@ class Calendar extends Base {
     }
   }
   
+  /**
+   * 
+   */
+  String _dataTargetSelector;
+  
   
   /** Construct a calendar object, wired to [element].
    * 
    */
-  Calendar(Element element, {String format, String date, String locale, DateTime value}) : 
-  this._format = _data(format, element, 'date-format', 'yyyy/MM/dd'),
+  Calendar(Element element, {String format, String date, String locale, DateTime value, String dataTargetSelector}) : 
+  this._format = _data(format, element, 'format', 'yyyy/MM/dd'),
   this._date = _data(date, element, 'date'),
   this._locale = _data(locale, element, 'date-locale', Intl.systemLocale),
+  this._dataTargetSelector = _data(dataTargetSelector, element, 'target'),
   this._value = value,
   super(element, _NAME) {
     
+    _initCalendar();
+    _initDatepicker();
+    
+  }
+  
+  /** Retrieve the wired Calendar object from an element. If there is no wired
+   * Calendar object, a new one will be created.
+   * 
+   * + [create] - If provided, it will be used for Calendar creation. Otherwise 
+   * the default constructor with no optional parameter value is used.
+   */
+  static Calendar wire(Element element, [Calendar create()]) => 
+      p.wire(element, _NAME, p.fallback(create, () => () => new Calendar(element)));
+  
+  void _initCalendar() {
     _dfmt = new DateFormat(this._format, this._locale);
     
     if (_date == null) {
@@ -172,14 +190,69 @@ class Calendar extends Base {
     _setView(DAY);
   }
   
-  /** Retrieve the wired Calendar object from an element. If there is no wired
-   * Calendar object, a new one will be created.
-   * 
-   * + [create] - If provided, it will be used for Calendar creation. Otherwise 
-   * the default constructor with no optional parameter value is used.
-   */
-  static Calendar wire(Element element, [Calendar create()]) => 
-      p.wire(element, _NAME, p.fallback(create, () => () => new Calendar(element)));
+  void _initDatepicker() {
+    Dropdown.use();
+    $element.on('change.bs.calendar', _onCalChange);
+    
+    if (_dataTargetSelector != null) {
+      queryAll(_dataTargetSelector).forEach(_bindCalendarValue);
+    }
+  }
+  
+  void _onCalChange(DQueryEvent e) {//cal value to elements 
+    if (_view != Calendar.DAY) return;
+    
+    if (_dataTargetSelector != null) {
+      
+      queryAll(_dataTargetSelector).forEach((Element elem) {
+        if (elem is InputElement) {
+          (elem as InputElement).value = _date;
+          _updateChange(elem);//for clear error and fire change
+        } else {
+          //todo bind text to label? e.innerHtml = _date;
+        }
+      });
+    }
+    
+    //Close dropdown
+    if (e.data == null || e.data['shallClose'] != false) {
+      Element p = element.parent;
+      if (p != null && (p = p.parent) != null)
+        p.classes.remove('open');
+    }
+  }
+  
+  void _bindCalendarValue(Element elem) {//element value to cal
+    if (elem is InputElement) {
+      (elem as InputElement).$dom_addEventListener("change", (_) => _updateChange(elem));
+    }
+  }
+  
+  void _updateChange(InputElement inp) {
+    String text = inp.value;
+    try {
+      DateTime val = new DateFormat(format, locale).parse(text);
+      _clearError(inp);
+      value = val;
+    } on FormatException catch (e) {
+      _markError(inp);
+    }
+   
+    $(inp).trigger('change.bs.datepicker');
+  }
+  
+  void _clearError(Element inp) {
+    Element p = inp.parent;
+    if (p != null)
+      p.classes.remove('has-error');
+    $(inp).trigger('error.bs.datepicker');
+  }
+  
+  void _markError(Element inp) {
+    Element p = inp.parent;
+    if (p != null)
+      p.classes.add('has-error');
+  }
   
   void _setView(String view) {
     
@@ -431,7 +504,7 @@ class Calendar extends Base {
     _registered = true;
     
     $window().on('load', (DQueryEvent e) {
-      for (Element elem in $('[data-picker="calendar"]')) {
+      for (Element elem in $('[class~="calendar"]')) {
         Calendar.wire(elem);
       }
     });

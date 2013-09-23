@@ -22,48 +22,52 @@ Then run the [Pub Package Manager](http://pub.dartlang.org/doc) in Dart Editor (
 ##Usage
 
 First of all in your HTML file, you need to include the CSS resource:
-  
+```html
 	<head>
 		...
-		<link rel="stylesheet" href="packages/bootjack_datepicker/css/bootjack_datepicker.min.css">
+		<link rel="stylesheet" href="packages/bootjack_datepicker/css/bootjack-datepicker.min.css">
 	</head>
-
+```
 ###Embedded calendar
-
-	<div data-picker="calendar" data-date="2013/09/16" data-date-format="yyyy/MM/dd"></div>
-	
-With the following global registration in Dart:
-
+To create a calendar component to your HTML page, add `class="calendar"` to the element you want to attach to (most typically this would be the `<div>`), 
+then you can specify `data-date` and `data-format` to the element for specify a default value and date format.
+```html
+	<div class="calendar" data-date="2013/09/16" data-format="yyyy/MM/dd"></div>
+```
+Then call the following global registration in Dart:
+```javascript
 	void main() {
 		Calendar.use();
-	}
-	
+```
 ###Datepicker
-
-	<div class="input-group" data-picker="datepicker" 
-	  data-date="2013/09/16" data-date-format="yyyy/MM/dd">
+Using a calendar component in a dropdown div element as a date picker component, add `class="calendar"` to the element you want to attach to, 
+then add the `data-target` attribute with the ID or class of the element that you want to display the date value.
+```html
+	<div class="input-group">
 		
-	  <input type="text" class="form-control">
+	  <input id="inp" type="text" class="form-control">
 	  
-	  <span class="input-group-btn">
+	  <div class="input-group-btn">
 		
-		<button class="btn btn-default dropdown-toggle" type="button" 
-		  data-toggle="dropdown" data-target="#">
+		<button id="btn" class="btn btn-default dropdown-toggle" 
+			type="button" data-toggle="dropdown">
 		  <span class="glyphicon glyphicon-calendar"></span>
 		</button>
 		
 		<div class="dropdown-menu" >
+			<div class="calendar" data-date="2013/09/16" data-format="yyyy/MM/dd"
+				data-target="#inp"></div>
 		</div>
 		
-	  </span>
+	  </div>
 	</div>
-	
-With the following global registration in Dart:
-
+```
+Then call the following global registration in Dart:
+```javascript
 	void main() {
-		Datepicker.use();
+		Calendar.use();
 	}
-	
+```
 Check more [examples](https://github.com/rikulo/bootjack-datepicker/tree/master/example).
 	
 ##Notes to Contributors
