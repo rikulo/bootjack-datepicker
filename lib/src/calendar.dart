@@ -59,38 +59,21 @@ class Calendar extends Base {
 </tr>
 ''';
 
-  
-  /**
-  * 
-  */
   String _format;
   
-  /**
-   * 
-   */
   DateTime _value;
   
-  /**
-   * 
-   */
   String _date;
   
-  /**
-   * 
-   */
   String _locale;
   
-  /**
-   * 
-   */
   String _view;
   
-  /**
-   * 
-   */
   DateFormat _dfmt;
   
-  
+  /**
+   * The date format of the calendar value.
+   */
   String get format => _format;
   void set format(String format) {
     if (_format != format) {
@@ -99,6 +82,9 @@ class Calendar extends Base {
     }
   }
   
+  /**
+   * The date format locale of the calendar value.
+   */
   String get locale => _locale;
   void set locale(String locale) {
     if (_locale != locale) {
@@ -107,6 +93,9 @@ class Calendar extends Base {
     }
   }
   
+  /**
+   * The text value of selected date.
+   */
   String get date => _date;
   void set date(String date) {
     if (_date != date) {
@@ -122,6 +111,9 @@ class Calendar extends Base {
     }
   }
   
+  /**
+   * The date value of selected date.
+   */
   DateTime get value => _value;
   void set value(DateTime value) {
     if (_value != value) {
@@ -133,9 +125,6 @@ class Calendar extends Base {
     }
   }
   
-  /**
-   * 
-   */
   String _dataTargetSelector;
   
   
@@ -497,7 +486,7 @@ class Calendar extends Base {
   // Data API //
   static bool _registered = false;
   
-  /** Register to use Scrollspy component.
+  /** Register to use Calendar component.
    */
   static void use() {
     if (_registered) return;
