@@ -102,7 +102,7 @@ class Calendar extends Base {
       _date = date;
       if (_dfmt != null) {
         try {
-          _value = _dfmt.parse(date);
+          _value = _setDateValue(_dfmt.parse(date));
           _markCal();
         } on FormatException catch (e) {
           //_value = null; keep previous value
@@ -117,7 +117,7 @@ class Calendar extends Base {
   DateTime get value => _value;
   void set value(DateTime value) {
     if (_value != value) {
-      _value = value;
+      _value = _setDateValue(value);
       if (_dfmt != null) {
         _date = value != null ? _dfmt.format(value): null;
         _markCal();
@@ -161,7 +161,7 @@ class Calendar extends Base {
         _date = _dfmt.format(_value);
     } else if (_value == null) {
       try {
-        _value = _dfmt.parse(date);
+        _value = _setDateValue(_dfmt.parse(date));
       } on FormatException catch (e) {
         //_value = null; keep previous value
       }
@@ -227,7 +227,7 @@ class Calendar extends Base {
       _markError(inp);
     }
    
-    $(inp).trigger('change.bs.datepicker');
+    $(inp).trigger('change.bs.datepicker', data: {'value': value});
   }
   
   void _clearError(Element inp) {
@@ -320,7 +320,7 @@ class Calendar extends Base {
     Element seld = element.query('.cnt .seld');
     if (seld != null)
       seld.classes.remove('seld');
-    DateTime val = _value != null ? _value: new DateTime.now();
+    DateTime val = _value != null ? _value: _setDateValue(new DateTime.now());
     int y = val.year;
     int m = val.month;
     Element title = element.query('.title');
@@ -409,7 +409,7 @@ class Calendar extends Base {
   }
   
   void _shiftDate (String opt, int ofs) {
-    DateTime val = _value != null ? _value: new DateTime.now();
+    DateTime val = _value != null ? _value: _setDateValue(new DateTime.now());
     
     int y = val.year;
     int m = val.month;
@@ -429,7 +429,7 @@ class Calendar extends Base {
     }
     
     value = _newDate(y, m ,d, !nofix);
-    $element.trigger('change.bs.calendar', data: {'value': _value, 'shallClose': false});
+    $element.trigger('change.bs.calendar', data: {'value': value, 'shallClose': false});
   }
   
   void _changeView(MouseEvent evt) {
@@ -447,7 +447,7 @@ class Calendar extends Base {
   }
 
   void _clickDate(DQueryEvent evt) {
-    DateTime val = _value != null ? _value: new DateTime.now();
+    DateTime val = _value != null ? _value: _setDateValue(new DateTime.now());
     
     ElementQuery target = $(evt.target);
     switch (this._view) {
@@ -474,13 +474,17 @@ class Calendar extends Base {
   }
   
   void _setTime(int y, [int m, int d]) {
-    DateTime val = _value != null ? _value: new DateTime.now();
+    DateTime val = _value != null ? _value: _setDateValue(new DateTime.now());
     int year = y != null ? y  : val.year;
     int month = m != null ? m : val.month;
     int day = d != null ? d : val.day;
     
     value = _newDate(year, month, day, d == null);
-    $element.trigger('change.bs.calendar', data: {'value': _value});
+    $element.trigger('change.bs.calendar', data: {'value': value});
+  }
+  
+  DateTime _setDateValue(DateTime date) {
+    return new DateTime(date.year, date.month, date.day, 12);
   }
   
   // Data API //
