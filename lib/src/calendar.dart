@@ -169,10 +169,10 @@ class Calendar extends Base {
     
     element.innerHtml = _CALENDAR_TEMPLATE;
     
-    element.query('.title').$dom_addEventListener('click', _changeView);
-    element.query('.left-icon').$dom_addEventListener('click', _clickArrow);
-    element.query('.right-icon').$dom_addEventListener('click', _clickArrow);
-    element.$dom_addEventListener('mousewheel', _doMousewheel);
+    element.querySelector('.title').addEventListener('click', _changeView);
+    element.querySelector('.left-icon').addEventListener('click', _clickArrow);
+    element.querySelector('.right-icon').addEventListener('click', _clickArrow);
+    element.addEventListener('mousewheel', _doMousewheel);
     
     $(element).on('click', _clickDate, selector: '.dayrow td, .cell12row span');
     
@@ -184,7 +184,7 @@ class Calendar extends Base {
     $element.on('change.bs.calendar', _onCalChange);
     
     if (_dataTargetSelector != null) {
-      queryAll(_dataTargetSelector).forEach(_bindCalendarValue);
+      querySelectorAll(_dataTargetSelector).forEach(_bindCalendarValue);
     }
   }
   
@@ -193,9 +193,9 @@ class Calendar extends Base {
     
     if (_dataTargetSelector != null) {
       
-      queryAll(_dataTargetSelector).forEach((Element elem) {
+      querySelectorAll(_dataTargetSelector).forEach((Element elem) {
         if (elem is InputElement) {
-          (elem as InputElement).value = _date;
+          elem.value = _date;
           _updateChange(elem);//for clear error and fire change
         } else {
           //todo bind text to label? e.innerHtml = _date;
@@ -213,7 +213,7 @@ class Calendar extends Base {
   
   void _bindCalendarValue(Element elem) {//element value to cal
     if (elem is InputElement) {
-      (elem as InputElement).$dom_addEventListener("change", (_) => _updateChange(elem));
+      elem.addEventListener("change", (_) => _updateChange(elem));
     }
   }
   
@@ -246,9 +246,9 @@ class Calendar extends Base {
   void _setView(String view) {
     
     //clear tbody
-    Element dow = element.query('.dow');
-    Element cell12row = element.query('.cell12row');
-    List<Element> dayrow = element.queryAll('.dayrow'); 
+    Element dow = element.querySelector('.dow');
+    Element cell12row = element.querySelector('.cell12row');
+    List<Element> dayrow = element.querySelectorAll('.dayrow'); 
     if (cell12row != null)
       cell12row.remove();
     if (dow != null)
@@ -282,7 +282,7 @@ class Calendar extends Base {
   }
   
   void _dayView() {
-    Element body = (element.query('.cnt') as TableElement).tBodies.first;
+    Element body = (element.querySelector('.cnt') as TableElement).tBodies.first;
     
     Element dow = body.createFragment(_DOW_TEMPLATE).children[0];
     List<Element> children = dow.children;
@@ -304,7 +304,7 @@ class Calendar extends Base {
   }
   
   void _cell12View(List<String> labels) {
-    Element body = (element.query('.cnt') as TableElement).tBodies.first;
+    Element body = (element.querySelector('.cnt') as TableElement).tBodies.first;
     Element cell12row = body.createFragment(_CELL12ROW_TEMPLATE).children[0];
     List<Element> children = cell12row.children.first.children;
     
@@ -317,23 +317,23 @@ class Calendar extends Base {
   }
   
   void _markCal([bool silent]) {
-    Element seld = element.query('.cnt .seld');
+    Element seld = element.querySelector('.cnt .seld');
     if (seld != null)
       seld.classes.remove('seld');
     DateTime val = _value != null ? _value: _setDateValue(new DateTime.now());
     int y = val.year;
     int m = val.month;
-    Element title = element.query('.title');
+    Element title = element.querySelector('.title');
     
     if (_view == DAY) {
       title.innerHtml = '${_dfmt.dateSymbols.SHORTMONTHS[m - 1]} $y';
       
       DateTime beginDate = new DateTime(y, m, 1);
       beginDate = beginDate.subtract(new Duration(days: beginDate.weekday));
-      List<Element> dayrow = element.queryAll('.dayrow');
+      List<Element> dayrow = element.querySelectorAll('.dayrow');
       int d = val.day;
       
-      List<Element> outside = element.queryAll('.dayrow td.outside');
+      List<Element> outside = element.querySelectorAll('.dayrow td.outside');
       for (Element e in outside) {
         e.classes.remove('outside');
       }
@@ -372,7 +372,7 @@ class Calendar extends Base {
       }
       
          
-      List<Element> cell12row = element.queryAll('.cell12row span');
+      List<Element> cell12row = element.querySelectorAll('.cell12row span');
       for (int i = cell12row.length; --i >= 0; yofs--) {
         if (!isMon)
           cell12row[i].innerHtml = '$yofs';
