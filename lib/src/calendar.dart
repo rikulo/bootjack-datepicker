@@ -11,10 +11,12 @@ class Calendar extends Base {
   
   static const String _CALENDAR_TEMPLATE = '''
 <table class="cnt" width="100%" border="0" cellspacing="0" cellpadding="0">
-  <tr>
-    <th class="left-icon">&laquo;</th>
-    <th class="title" colspan="5"></th>
-    <th class="right-icon">&raquo;</th>
+  <tr class="header">
+    <th colspan="7">
+      <a class="left-icon"><i class="icon-caret-left"></i></a>
+      <a class="title"></a>
+      <a class="right-icon"><i class="icon-caret-right"></i></a>
+    </th>
   </tr>
 </table>
 ''';
