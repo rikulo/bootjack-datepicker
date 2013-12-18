@@ -208,8 +208,9 @@ class Calendar extends Base {
     //Close dropdown
     if (e.data == null || e.data['shallClose'] != false) {
       Element p = element.parent;
-      if (p != null && (p = p.parent) != null)
-        p.classes.remove('open');
+      if (p != null && (p = p.parent) != null && p.classes.contains('open')) {
+        $document().trigger('click.bs.dropdown.data-api');
+      }
     }
   }
   
@@ -322,7 +323,8 @@ class Calendar extends Base {
     Element seld = element.querySelector('.cnt .seld');
     if (seld != null)
       seld.classes.remove('seld');
-    DateTime val = _value != null ? _value: _setDateValue(new DateTime.now());
+    bool isNullValue = _value == null;
+    DateTime val = isNullValue ? _setDateValue(new DateTime.now()): _value;
     int y = val.year;
     int m = val.month;
     Element title = element.querySelector('.title');
@@ -349,7 +351,7 @@ class Calendar extends Base {
           if (beginDate.month != m) {
             td.classes.add('outside');
             $(td).data.set('monofs', beginDate.month > m ? 1: -1);
-          } else if (beginDate.day == d){
+          } else if (!isNullValue && beginDate.day == d){
             td.classes.add('seld');
           }
           
@@ -378,7 +380,7 @@ class Calendar extends Base {
       for (int i = cell12row.length; --i >= 0; yofs--) {
         if (!isMon)
           cell12row[i].innerHtml = '$yofs';
-        if (index == i)
+        if (!isNullValue && index == i)
           cell12row[i].classes.add('seld');
       }
     }
@@ -431,7 +433,8 @@ class Calendar extends Base {
     }
     
     value = _newDate(y, m ,d, !nofix);
-    $element.trigger('change.bs.calendar', data: {'value': value, 'shallClose': false});
+    $element.trigger('change.bs.calendar', 
+        data: {'value': value, 'view': this._view, 'shallClose': false, 'shiftDate': true});
   }
   
   void _changeView(MouseEvent evt) {
@@ -482,10 +485,13 @@ class Calendar extends Base {
     int day = d != null ? d : val.day;
     
     value = _newDate(year, month, day, d == null);
-    $element.trigger('change.bs.calendar', data: {'value': value});
+    
+    $element.trigger('change.bs.calendar', data: {'value': value, 'view': this._view});
   }
   
   DateTime _setDateValue(DateTime date) {
+    if (date == null) return null;
+    
     return new DateTime(date.year, date.month, date.day, 12);
   }
   
