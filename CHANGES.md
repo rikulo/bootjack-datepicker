@@ -5,6 +5,7 @@
 * Apply new style.
 * Fixed dropdown doesn't trigger close event
 * Fine tune calendar event data
+* Apply today class
 
 **0.5.2**
 

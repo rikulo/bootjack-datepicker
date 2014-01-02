@@ -325,8 +325,11 @@ class Calendar extends Base {
       seld.classes.remove('seld');
     bool isNullValue = _value == null;
     DateTime val = isNullValue ? _setDateValue(new DateTime.now()): _value;
+    DateTime today = _setDateValue(new DateTime.now());
     int y = val.year;
     int m = val.month;
+    bool inTodayRange = val.year == today.year && val.month == today.month;
+    
     Element title = element.querySelector('.title');
     
     if (_view == DAY) {
@@ -354,6 +357,9 @@ class Calendar extends Base {
           } else if (!isNullValue && beginDate.day == d){
             td.classes.add('seld');
           }
+          
+          if (inTodayRange && beginDate.day == today.day)
+            td.classes.add('today');
           
           beginDate = beginDate.add(new Duration(days: 1));
         }
