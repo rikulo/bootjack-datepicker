@@ -392,7 +392,7 @@ class Calendar extends Base {
       int yofs = 0;
       
       if (isMon)
-        title.innerHtml = '${_dfmt.dateSymbols.SHORTMONTHS[m - 1]} $y';
+        title.innerHtml = '$y';
       else {
         yofs = y - index;
         title.innerHtml = '$yofs-${yofs + 11}';
@@ -401,11 +401,15 @@ class Calendar extends Base {
       
       bool inSelectedDayRange = isNullValue ? false: _currentValue.year == _value.year;
       
-      
-        if (!isMon && !isNullValue) {
+      if (!isNullValue) {
+        if (isMon) {
+          index = _value.month - 1;
+        } else {
           inSelectedDayRange = (yofs - 11) <= _value.year && _value.year <= yofs;
           index = _value.year  - yofs + 11;
         }
+        
+      }
       
          
       List<Element> cell12row = element.querySelectorAll('.cell12row span');
@@ -524,7 +528,8 @@ class Calendar extends Base {
   DateTime _newDate(int year, int month, int day, bool bFix) {
     DateTime v = new DateTime(year, month, day);
     return bFix && v.month != month && v.day != day ?
-      new DateTime(year, month + 1, 0)/*last day of month*/: v;
+        _setDateValue(new DateTime(year, month + 1, 0))/*last day of month*/: 
+        _setDateValue(v);
   }
   
   void _setTime(int y, [int m, int d, bool readValue]) {
@@ -536,7 +541,7 @@ class Calendar extends Base {
     _currentValue = _newDate(year, month, day, d == null);
     
     if (readValue) {
-      value  = _currentValue;
+      value = _currentValue;
       $element.trigger('change.bs.calendar', data: {'value': value, 'view': this._view});
     }
   }
@@ -545,6 +550,14 @@ class Calendar extends Base {
     if (date == null) return null;
     
     return new DateTime(date.year, date.month, date.day, 12);
+  }
+  
+  /**
+   * Make calendar back to day view and selected date.
+   */
+  void reset() {
+    _currentValue = _value;
+    _setView(DAY);
   }
   
   // Data API //
