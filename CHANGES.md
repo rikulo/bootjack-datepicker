@@ -6,6 +6,7 @@
 * Fixed dropdown doesn't trigger close event
 * Fine tune calendar event data
 * Apply today class
+* Support renderSelectedDay, renderToDay
 
 **0.5.2**
 

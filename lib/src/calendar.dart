@@ -356,10 +356,13 @@ class Calendar extends Base {
             $(td).data.set('monofs', beginDate.month > m ? 1: -1);
           } else if (!isNullValue && beginDate.day == d){
             td.classes.add('seld');
+            renderSelectedDay(td);
           }
           
-          if (inTodayRange && beginDate.day == today.day)
+          if (inTodayRange && beginDate.day == today.day) {
             td.classes.add('today');
+            renderToDay(td);
+          }
           
           beginDate = beginDate.add(new Duration(days: 1));
         }
@@ -386,10 +389,20 @@ class Calendar extends Base {
       for (int i = cell12row.length; --i >= 0; yofs--) {
         if (!isMon)
           cell12row[i].innerHtml = '$yofs';
-        if (!isNullValue && index == i)
+        if (!isNullValue && index == i) {
           cell12row[i].classes.add('seld');
+          renderSelectedDay(cell12row[i]);
+        }
       }
     }
+  }
+  
+  void renderSelectedDay(Element elem) {
+    
+  }
+  
+  void renderToDay(Element elem) {
+    
   }
   
   void _doMousewheel(WheelEvent evt) {
