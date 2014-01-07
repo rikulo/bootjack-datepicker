@@ -63,7 +63,7 @@ class Calendar extends Base {
 
   String _format;
   
-  DateTime _value;
+  DateTime _value, _currentValue;
   
   String _date;
   
@@ -104,7 +104,7 @@ class Calendar extends Base {
       _date = date;
       if (_dfmt != null) {
         try {
-          _value = _setDateValue(_dfmt.parse(date));
+          _value = _currentValue = _setDateValue(_dfmt.parse(date));
           _markCal();
         } on FormatException catch (e) {
           //_value = null; keep previous value
@@ -119,7 +119,7 @@ class Calendar extends Base {
   DateTime get value => _value;
   void set value(DateTime value) {
     if (_value != value) {
-      _value = _setDateValue(value);
+      _value = _currentValue = _setDateValue(value);
       if (_dfmt != null) {
         _date = value != null ? _dfmt.format(value): null;
         _markCal();
@@ -139,8 +139,8 @@ class Calendar extends Base {
   this._locale = _data(locale, element, 'date-locale', Intl.systemLocale),
   this._dataTargetSelector = _data(dataTargetSelector, element, 'target'),
   this._value = value,
+  this._currentValue = value,
   super(element, _NAME) {
-    
     _initCalendar();
     _initDatepicker();
     
@@ -163,7 +163,7 @@ class Calendar extends Base {
         _date = _dfmt.format(_value);
     } else if (_value == null) {
       try {
-        _value = _setDateValue(_dfmt.parse(date));
+        _value = _currentValue = _setDateValue(_dfmt.parse(date));
       } on FormatException catch (e) {
         //_value = null; keep previous value
       }
@@ -271,7 +271,7 @@ class Calendar extends Base {
       break;
     case YEAR:
       List<String> labels = [];
-      int y = _value.year;
+      int y = _currentValue.year;
       int yofs = y - (y % 10 + 1);
 
       for (int i = 12; --i >= 0; yofs++) {
@@ -329,26 +329,33 @@ class Calendar extends Base {
       todayElem.classes.remove('today');
     
     bool isNullValue = _value == null;
-    DateTime val = isNullValue ? _setDateValue(new DateTime.now()): _value;
+    
     DateTime today = _setDateValue(new DateTime.now());
-    int y = val.year;
-    int m = val.month;
-    bool inTodayRange = val.year == today.year && val.month == today.month;
+    if (_currentValue == null)
+      _currentValue = today;
+    
+    int y = _currentValue.year;
+    int m = _currentValue.month;
     
     Element title = element.querySelector('.title');
     
     if (_view == DAY) {
-      title.innerHtml = '${_dfmt.dateSymbols.SHORTMONTHS[m - 1]} $y';
       
       DateTime beginDate = new DateTime(y, m, 1);
       beginDate = beginDate.subtract(new Duration(days: beginDate.weekday));
-      List<Element> dayrow = element.querySelectorAll('.dayrow');
-      int d = val.day;
       
+      
+      bool inTodayRange = _inDayViewRange(beginDate, today);
+      bool inSelectedDayRange = _value == null ? false: _inDayViewRange(beginDate, _value);
+      
+      
+      title.innerHtml = '${_dfmt.dateSymbols.SHORTMONTHS[m - 1]} $y';
+      List<Element> dayrow = element.querySelectorAll('.dayrow');
       List<Element> outside = element.querySelectorAll('.dayrow td.outside');
       for (Element e in outside) {
         e.classes.remove('outside');
       }
+      
       
       for (Element row in dayrow) {
         for (Element td in row.children) {
@@ -356,16 +363,18 @@ class Calendar extends Base {
           td.innerHtml = beginDate.day.toString();
           
           $(td).data.set('monofs', 0);
+          
           if (beginDate.month != m) {
             td.classes.add('outside');
             $(td).data.set('monofs', beginDate.month > m ? 1: -1);
-          } else if (!isNullValue && beginDate.day == d){
+          }
+          
+          if (inSelectedDayRange && beginDate.month == _value.month && beginDate.day == _value.day){
             td.classes.add('seld');
             renderSelectedDay(td);
           }
           
-          if (inTodayRange && beginDate.month == m && 
-              beginDate.day == today.day) {
+          if (inTodayRange && beginDate.month == today.month && beginDate.day == today.day) {
             td.classes.add('today');
             renderToDay(td);
           }
@@ -377,9 +386,9 @@ class Calendar extends Base {
       
     } else {
       
-      
       bool isMon = _view == MONTH;
       int index = isMon? m - 1: y % 10 + 1;
+      
       int yofs = 0;
       
       if (isMon)
@@ -390,17 +399,32 @@ class Calendar extends Base {
         yofs += 11;
       }
       
+      bool inSelectedDayRange = isNullValue ? false: _currentValue.year == _value.year;
+      
+      
+        if (!isMon && !isNullValue) {
+          inSelectedDayRange = (yofs - 11) <= _value.year && _value.year <= yofs;
+          index = _value.year  - yofs + 11;
+        }
+      
          
       List<Element> cell12row = element.querySelectorAll('.cell12row span');
       for (int i = cell12row.length; --i >= 0; yofs--) {
         if (!isMon)
           cell12row[i].innerHtml = '$yofs';
-        if (!isNullValue && index == i) {
+        if (inSelectedDayRange && index == i) {
           cell12row[i].classes.add('seld');
           renderSelectedDay(cell12row[i]);
         }
       }
     }
+  }
+  
+  bool _inDayViewRange(DateTime beginDate, DateTime date) {
+    int days = beginDate.difference(date).inDays;
+    if (-42 < days && days < 1)
+      return true;
+    return false;
   }
   
   void renderSelectedDay(Element elem) {
@@ -438,7 +462,7 @@ class Calendar extends Base {
   }
   
   void _shiftDate (String opt, int ofs) {
-    DateTime val = _value != null ? _value: _setDateValue(new DateTime.now());
+    DateTime val = _currentValue != null ? _currentValue: _setDateValue(new DateTime.now());
     
     int y = val.year;
     int m = val.month;
@@ -457,9 +481,9 @@ class Calendar extends Base {
       break;
     }
     
-    value = _newDate(y, m ,d, !nofix);
-    $element.trigger('change.bs.calendar', 
-        data: {'value': value, 'view': this._view, 'shallClose': false, 'shiftDate': true});
+    _currentValue = _newDate(y, m ,d, !nofix);
+//    $element.trigger('change.bs.calendar', 
+//        data: {'value': value, 'view': this._view, 'shallClose': false, 'shiftDate': true});
   }
   
   void _changeView(MouseEvent evt) {
@@ -477,12 +501,12 @@ class Calendar extends Base {
   }
 
   void _clickDate(DQueryEvent evt) {
-    DateTime val = _value != null ? _value: _setDateValue(new DateTime.now());
+    DateTime val = _currentValue != null ? _currentValue: _setDateValue(new DateTime.now());
     
     ElementQuery target = $(evt.target);
     switch (this._view) {
     case DAY:
-      _setTime(null, (val.month + target.data.get("monofs")),  int.parse(target.html));
+      _setTime(null, (val.month + target.data.get("monofs")),  int.parse(target.html), true);
       _markCal();
       break;
     case MONTH:
@@ -503,15 +527,18 @@ class Calendar extends Base {
       new DateTime(year, month + 1, 0)/*last day of month*/: v;
   }
   
-  void _setTime(int y, [int m, int d]) {
-    DateTime val = _value != null ? _value: _setDateValue(new DateTime.now());
+  void _setTime(int y, [int m, int d, bool readValue]) {
+    DateTime val = _currentValue != null ? _currentValue: _setDateValue(new DateTime.now());
     int year = y != null ? y  : val.year;
     int month = m != null ? m : val.month;
     int day = d != null ? d : val.day;
     
-    value = _newDate(year, month, day, d == null);
+    _currentValue = _newDate(year, month, day, d == null);
     
-    $element.trigger('change.bs.calendar', data: {'value': value, 'view': this._view});
+    if (readValue) {
+      value  = _currentValue;
+      $element.trigger('change.bs.calendar', data: {'value': value, 'view': this._view});
+    }
   }
   
   DateTime _setDateValue(DateTime date) {
