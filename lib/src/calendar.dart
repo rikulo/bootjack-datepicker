@@ -323,6 +323,11 @@ class Calendar extends Base {
     Element seld = element.querySelector('.cnt .seld');
     if (seld != null)
       seld.classes.remove('seld');
+    
+    Element todayElem = element.querySelector('.cnt .today');
+    if (todayElem != null)
+      todayElem.classes.remove('today');
+    
     bool isNullValue = _value == null;
     DateTime val = isNullValue ? _setDateValue(new DateTime.now()): _value;
     DateTime today = _setDateValue(new DateTime.now());
@@ -359,7 +364,8 @@ class Calendar extends Base {
             renderSelectedDay(td);
           }
           
-          if (inTodayRange && beginDate.day == today.day) {
+          if (inTodayRange && beginDate.month != m && 
+              beginDate.day == today.day) {
             td.classes.add('today');
             renderToDay(td);
           }
