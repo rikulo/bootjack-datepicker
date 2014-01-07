@@ -364,7 +364,7 @@ class Calendar extends Base {
             renderSelectedDay(td);
           }
           
-          if (inTodayRange && beginDate.month != m && 
+          if (inTodayRange && beginDate.month == m && 
               beginDate.day == today.day) {
             td.classes.add('today');
             renderToDay(td);
