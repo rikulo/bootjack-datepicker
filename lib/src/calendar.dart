@@ -362,11 +362,16 @@ class Calendar extends Base {
           td.innerHtml = '${beginDate.day}';
           td.innerHtml = beginDate.day.toString();
           
-          $(td).data.set('monofs', 0);
-          
+          int monofs = 0;
           if (beginDate.month != m) {
             td.classes.add('outside');
-            $(td).data.set('monofs', beginDate.month > m ? 1: -1);
+            
+            int curY = beginDate.year;
+            if (curY == y) {
+              monofs = beginDate.month > m ? 1: -1;
+            } else {
+              monofs = curY > y ? 1: -1;
+            }
           }
           
           if (inSelectedDayRange && beginDate.month == _value.month && beginDate.day == _value.day){
@@ -379,6 +384,7 @@ class Calendar extends Base {
             renderToDay(td);
           }
           
+          $(td).data.set('monofs', monofs);
           beginDate = beginDate.add(new Duration(days: 1));
         }
       }

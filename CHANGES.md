@@ -7,6 +7,7 @@
 * Fine tune calendar event data
 * Apply today class
 * Support renderSelectedDay, renderToDay
+* Fixed pick previous year bug
 
 **0.5.2**
 
