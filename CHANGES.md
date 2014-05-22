@@ -8,6 +8,7 @@
 * Apply today class
 * Support renderSelectedDay, renderToDay
 * Fixed pick previous year bug
+* Fixed navigate date by click right/left arrow bug
 
 **0.5.2**
 

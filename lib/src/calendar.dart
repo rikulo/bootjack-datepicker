@@ -451,7 +451,7 @@ class Calendar extends Base {
   }
   
   void _clickArrow(MouseEvent evt) {
-    _shiftView((evt.target as Element)
+    _shiftView((evt.currentTarget as Element)
         .classes.contains('left-icon') ? -1: 1);
     evt.stopPropagation();
   }
