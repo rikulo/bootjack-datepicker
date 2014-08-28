@@ -190,7 +190,7 @@ class Calendar extends Base {
     }
   }
   
-  void _onCalChange(DQueryEvent e) {//cal value to elements 
+  void _onCalChange(QueryEvent e) {//cal value to elements 
     if (_view != Calendar.DAY) return;
     
     if (_dataTargetSelector != null) {
@@ -510,7 +510,7 @@ class Calendar extends Base {
     evt.stopPropagation();
   }
 
-  void _clickDate(DQueryEvent evt) {
+  void _clickDate(QueryEvent evt) {
     DateTime val = _currentValue != null ? _currentValue: _setDateValue(new DateTime.now());
     
     ElementQuery target = $(evt.target);
@@ -575,7 +575,7 @@ class Calendar extends Base {
     if (_registered) return;
     _registered = true;
     
-    $window().on('load', (DQueryEvent e) {
+    $window().on('load', (QueryEvent e) {
       for (Element elem in $('[class~="calendar"]')) {
         Calendar.wire(elem);
       }

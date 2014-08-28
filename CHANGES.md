@@ -1,4 +1,8 @@
 #CHANGES
+
+**0.5.4**
+* Support Dquery 0.7.0
+
 **0.5.3**
 
 * Upgrade for Dart SDK 1.0
