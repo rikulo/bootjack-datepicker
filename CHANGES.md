@@ -1,5 +1,8 @@
 #CHANGES
 
+**0.5.5**
+* Support chang date view and shift date view event
+
 **0.5.4**
 * Support Dquery 0.7.0
 

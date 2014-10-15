@@ -171,12 +171,14 @@ class Calendar extends Base {
     
     element.innerHtml = _CALENDAR_TEMPLATE;
     
-    element.querySelector('.title').addEventListener('click', _changeView);
-    element.querySelector('.left-icon').addEventListener('click', _clickArrow);
-    element.querySelector('.right-icon').addEventListener('click', _clickArrow);
-    element.addEventListener('mousewheel', _doMousewheel);
+    $(element)
+    ..on('mousewheel', _doMousewheel)
+        
+    ..on('click', _changeView, selector: '.title')
+    ..on('click', _clickArrow, selector: '.left-icon')
+    ..on('click', _clickArrow, selector: '.right-icon')
     
-    $(element).on('click', _clickDate, selector: '.dayrow td, .cell12row span');
+    ..on('click', _clickDate, selector: '.dayrow td, .cell12row span');
     
     _setView(DAY);
   }
@@ -428,6 +430,8 @@ class Calendar extends Base {
         }
       }
     }
+    
+    $element.trigger('changView.bs.calendar', data: {'value': _currentValue, 'view': _view});
   }
   
   bool _inDayViewRange(DateTime beginDate, DateTime date) {
@@ -445,12 +449,13 @@ class Calendar extends Base {
     
   }
   
-  void _doMousewheel(WheelEvent evt) {
-    _shiftView(evt.deltaY > 0 ? 1: -1);
+  void _doMousewheel(QueryEvent evt) {
+    WheelEvent wevt = evt.originalEvent;
+    _shiftView(wevt.deltaY > 0 ? 1: -1);
     evt.stopPropagation();
   }
   
-  void _clickArrow(MouseEvent evt) {
+  void _clickArrow(QueryEvent evt) {
     _shiftView((evt.currentTarget as Element)
         .classes.contains('left-icon') ? -1: 1);
     evt.stopPropagation();
@@ -469,6 +474,8 @@ class Calendar extends Base {
       break;
     }
     _markCal();
+    
+    $element.trigger('shiftView.bs.calendar', data: {'value': _currentValue, 'view': _view});
   }
   
   void _shiftDate (String opt, int ofs) {
@@ -496,7 +503,7 @@ class Calendar extends Base {
 //        data: {'value': value, 'view': this._view, 'shallClose': false, 'shiftDate': true});
   }
   
-  void _changeView(MouseEvent evt) {
+  void _changeView(QueryEvent evt) {
     switch (this._view) {
       case DAY:
         _setView(MONTH);
