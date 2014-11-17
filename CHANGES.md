@@ -2,6 +2,7 @@
 
 **0.5.5**
 * Support chang date view and shift date view event
+* Fixed DST timezone date render issue
 
 **0.5.4**
 * Support Dquery 0.7.0

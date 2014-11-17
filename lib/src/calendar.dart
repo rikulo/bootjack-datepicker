@@ -296,7 +296,7 @@ class Calendar extends Base {
     
     //render week days
     for (int i = swkDays.length; --i >= 0;) {
-      children[i].innerHtml = swkDays[i];
+      children[i].text = swkDays[i];
     }
     
     var buffer = new StringBuffer();
@@ -315,7 +315,7 @@ class Calendar extends Base {
     
     //render month
     for (int i = labels.length; --i >= 0;) {
-      children[i].innerHtml = labels[i];
+      children[i].text = labels[i];
     }
     
     body.append(cell12row);
@@ -351,7 +351,7 @@ class Calendar extends Base {
       bool inSelectedDayRange = _value == null ? false: _inDayViewRange(beginDate, _value);
       
       
-      title.innerHtml = '${_dfmt.dateSymbols.SHORTMONTHS[m - 1]} $y';
+      title.text = '${_dfmt.dateSymbols.SHORTMONTHS[m - 1]} $y';
       List<Element> dayrow = element.querySelectorAll('.dayrow');
       List<Element> outside = element.querySelectorAll('.dayrow td.outside');
       for (Element e in outside) {
@@ -361,8 +361,7 @@ class Calendar extends Base {
       
       for (Element row in dayrow) {
         for (Element td in row.children) {
-          td.innerHtml = '${beginDate.day}';
-          td.innerHtml = beginDate.day.toString();
+          td.text = '${beginDate.day}';
           
           int monofs = 0;
           if (beginDate.month != m) {
@@ -387,7 +386,7 @@ class Calendar extends Base {
           }
           
           $(td).data.set('monofs', monofs);
-          beginDate = beginDate.add(new Duration(days: 1));
+          beginDate = new DateTime(beginDate.year, beginDate.month, beginDate.day + 1);
         }
       }
 
@@ -400,10 +399,10 @@ class Calendar extends Base {
       int yofs = 0;
       
       if (isMon)
-        title.innerHtml = '$y';
+        title.text = '$y';
       else {
         yofs = y - index;
-        title.innerHtml = '$yofs-${yofs + 11}';
+        title.text = '$yofs-${yofs + 11}';
         yofs += 11;
       }
       
@@ -423,7 +422,7 @@ class Calendar extends Base {
       List<Element> cell12row = element.querySelectorAll('.cell12row span');
       for (int i = cell12row.length; --i >= 0; yofs--) {
         if (!isMon)
-          cell12row[i].innerHtml = '$yofs';
+          cell12row[i].text = '$yofs';
         if (inSelectedDayRange && index == i) {
           cell12row[i].classes.add('seld');
           renderSelectedDay(cell12row[i]);
