@@ -73,6 +73,8 @@ class Calendar extends Base {
   
   DateFormat _dfmt;
   
+  Function _newDate;
+  
   /**
    * The date format of the calendar value.
    */
@@ -133,13 +135,14 @@ class Calendar extends Base {
   /** Construct a calendar object, wired to [element].
    * 
    */
-  Calendar(Element element, {String format, String date, String locale, DateTime value, String dataTargetSelector}) : 
+  Calendar(Element element, {String format, String date, String locale, DateTime value, String dataTargetSelector, DateTime newDate(y,m,d)}) : 
   this._format = _data(format, element, 'format', 'yyyy/MM/dd'),
   this._date = _data(date, element, 'date'),
   this._locale = _data(locale, element, 'date-locale', Intl.systemLocale),
   this._dataTargetSelector = _data(dataTargetSelector, element, 'target'),
   this._value = value,
   this._currentValue = value,
+  this._newDate = newDate,
   super(element, _NAME) {
     _initCalendar();
     _initDatepicker();
@@ -496,7 +499,7 @@ class Calendar extends Base {
       break;
     }
     
-    _currentValue = _newDate(y, m ,d, !nofix);
+    _currentValue = _newDate0(y, m ,d, !nofix);
 //    $element.trigger('change.bs.calendar', 
 //        data: {'value': value, 'view': this._view, 'shallClose': false, 'shiftDate': true});
   }
@@ -542,15 +545,15 @@ class Calendar extends Base {
     int month = m != null ? m : val.month;
     int day = d != null ? d : val.day;
     
-    _currentValue = _newDate(year, month, day, d == null);
+    _currentValue = _newDate0(year, month, day, d == null);
     
     if (readValue) {
-      value = _currentValue;
+      value = _newDate != null ? _newDate(year, month, day): _currentValue;
       $element.trigger('change.bs.calendar', data: {'value': value, 'view': this._view});
     }
   }
   
-  DateTime _newDate(int year, int month, int day, bool bFix) {
+  DateTime _newDate0(int year, int month, int day, bool bFix) {
       DateTime v = new DateTime(year, month, day);
       return bFix && v.month != month && v.day != day ?
           _setDateValue(_newDateTime(year, month + 1, 0, true))/*last day of month*/: 
