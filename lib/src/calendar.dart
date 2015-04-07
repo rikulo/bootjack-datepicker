@@ -332,7 +332,7 @@ class Calendar extends Base {
     
     bool isNullValue = _value == null;
     
-    DateTime today = _setDateValue(new DateTime.now());
+    DateTime today = _setDateValue(todayUtc());
     if (_currentValue == null)
       _currentValue = today;
     
@@ -343,9 +343,8 @@ class Calendar extends Base {
     
     if (_view == DAY) {
       
-      DateTime beginDate = new DateTime(y, m, 1);
+      DateTime beginDate = _newDateTime(y, m, 1, true);
       beginDate = beginDate.subtract(new Duration(days: beginDate.weekday));
-      
       
       bool inTodayRange = _inDayViewRange(beginDate, today);
       bool inSelectedDayRange = _value == null ? false: _inDayViewRange(beginDate, _value);
@@ -386,7 +385,7 @@ class Calendar extends Base {
           }
           
           $(td).data.set('monofs', monofs);
-          beginDate = new DateTime(beginDate.year, beginDate.month, beginDate.day + 1);
+          beginDate = _newDateTime(beginDate.year, beginDate.month, beginDate.day + 1, true);
         }
       }
 
@@ -478,7 +477,7 @@ class Calendar extends Base {
   }
   
   void _shiftDate (String opt, int ofs) {
-    DateTime val = _currentValue != null ? _currentValue: _setDateValue(new DateTime.now());
+    DateTime val = _currentValue != null ? _currentValue: _setDateValue(todayUtc());
     
     int y = val.year;
     int m = val.month;
@@ -517,7 +516,7 @@ class Calendar extends Base {
   }
 
   void _clickDate(QueryEvent evt) {
-    DateTime val = _currentValue != null ? _currentValue: _setDateValue(new DateTime.now());
+    DateTime val = _currentValue != null ? _currentValue: _setDateValue(todayUtc());
     
     ElementQuery target = $(evt.target);
     switch (this._view) {
@@ -537,15 +536,8 @@ class Calendar extends Base {
     evt.stopPropagation();
   }
   
-  DateTime _newDate(int year, int month, int day, bool bFix) {
-    DateTime v = new DateTime(year, month, day);
-    return bFix && v.month != month && v.day != day ?
-        _setDateValue(new DateTime(year, month + 1, 0))/*last day of month*/: 
-        _setDateValue(v);
-  }
-  
   void _setTime(int y, [int m, int d, bool readValue]) {
-    DateTime val = _currentValue != null ? _currentValue: _setDateValue(new DateTime.now());
+    DateTime val = _currentValue != null ? _currentValue: _setDateValue(todayUtc());
     int year = y != null ? y  : val.year;
     int month = m != null ? m : val.month;
     int day = d != null ? d : val.day;
@@ -558,10 +550,25 @@ class Calendar extends Base {
     }
   }
   
-  DateTime _setDateValue(DateTime date) {
+  DateTime _newDate(int year, int month, int day, bool bFix) {
+      DateTime v = new DateTime(year, month, day);
+      return bFix && v.month != month && v.day != day ?
+          _setDateValue(_newDateTime(year, month + 1, 0, true))/*last day of month*/: 
+          _setDateValue(v);
+    }
+    
+    static DateTime _newDateTime(int year, int month, int day, bool isUtc)
+      => isUtc ? new DateTime.utc(year, month, day): new DateTime(year, month, day);
+      
+    static DateTime todayUtc() {
+      DateTime today = new DateTime.now();
+      return new DateTime.utc(today.year, today.month, today.day);
+    }
+  
+  static DateTime _setDateValue(DateTime date) {
     if (date == null) return null;
     
-    return new DateTime(date.year, date.month, date.day, 12);
+    return new DateTime.utc(date.year, date.month, date.day, 12);
   }
   
   /**
