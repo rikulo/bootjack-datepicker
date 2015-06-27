@@ -1,10 +1,12 @@
 name: bootjack_datepicker
-version: 0.5.4+4
+version: 0.5.5
 author: Jimmy Shiau <jimmyshiau@potix.com>
 description: Bootjack datepicker component is a datepicker component of Bootjack.
 homepage: https://github.com/rikulo/bootjack-datepicker
-documentation: http://blog.rikulo.org
+documentation: http://www.dartdocs.org/documentation/bootjack_datepicker/0.5.5
 dependencies:
   browser: any
   bootjack: any
   intl: any
+environment:
+  sdk: ">=1.11.0"

@@ -108,7 +108,7 @@ class Calendar extends Base {
         try {
           _value = _currentValue = _setDateValue(_dfmt.parse(date));
           _markCal();
-        } on FormatException catch (e) {
+        } on FormatException catch (_) {
           //_value = null; keep previous value
         }
       }
@@ -167,7 +167,7 @@ class Calendar extends Base {
     } else if (_value == null) {
       try {
         _value = _currentValue = _setDateValue(_dfmt.parse(date));
-      } on FormatException catch (e) {
+      } on FormatException catch (_) {
         //_value = null; keep previous value
       }
     }
@@ -231,7 +231,7 @@ class Calendar extends Base {
       DateTime val = new DateFormat(format, locale).parse(text);
       _clearError(inp);
       value = val;
-    } on FormatException catch (e) {
+    } on FormatException catch (_) {
       _markError(inp);
     }
    
@@ -308,7 +308,7 @@ class Calendar extends Base {
     }
     
     body.append(dow);
-    body.appendHtml(buffer.toString());
+    body.appendHtml(buffer.toString(), treeSanitizer: const _NullTreeSanitizer());
   }
   
   void _cell12View(List<String> labels) {
@@ -601,3 +601,8 @@ class Calendar extends Base {
 
 _data(value, Element elem, String name, [defaultValue]) =>
     p.fallback(value, () => elem.attributes["data-$name"], () => defaultValue);
+
+class _NullTreeSanitizer implements NodeTreeSanitizer {
+  const _NullTreeSanitizer();
+  void sanitizeTree(Node node) {}
+}
