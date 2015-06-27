@@ -8,5 +8,6 @@ dependencies:
   browser: any
   bootjack: any
   intl: any
+  rikulo_commons: ">=2.0.5"
 environment:
   sdk: ">=1.11.0"

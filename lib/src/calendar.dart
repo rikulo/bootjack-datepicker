@@ -308,7 +308,7 @@ class Calendar extends Base {
     }
     
     body.append(dow);
-    body.appendHtml(buffer.toString(), treeSanitizer: const _NullTreeSanitizer());
+    body.appendHtml(buffer.toString(), treeSanitizer: const NullTreeSanitizer());
   }
   
   void _cell12View(List<String> labels) {
@@ -601,8 +601,3 @@ class Calendar extends Base {
 
 _data(value, Element elem, String name, [defaultValue]) =>
     p.fallback(value, () => elem.attributes["data-$name"], () => defaultValue);
-
-class _NullTreeSanitizer implements NodeTreeSanitizer {
-  const _NullTreeSanitizer();
-  void sanitizeTree(Node node) {}
-}
