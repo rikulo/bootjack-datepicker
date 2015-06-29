@@ -1,5 +1,8 @@
 #CHANGES
 
+**0.5.6**
+* Fixed table content do not render correctly
+
 **0.5.5**
 * Support chang date view and shift date view event
 * Fixed DST timezone date render issue

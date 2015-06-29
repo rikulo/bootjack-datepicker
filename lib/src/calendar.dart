@@ -290,9 +290,8 @@ class Calendar extends Base {
   }
   
   void _dayView() {
-    Element body = (element.querySelector('.cnt') as TableElement).tBodies.first;
-    
-    Element dow = body.createFragment(_DOW_TEMPLATE).children[0];
+    TableElement calBody = element.querySelector('.cnt');
+    Element dow = calBody.tBodies[0].createFragment(_DOW_TEMPLATE).children[0];
     List<Element> children = dow.children;
     
     List<String> swkDays = _dfmt.dateSymbols.SHORTWEEKDAYS;
@@ -307,9 +306,14 @@ class Calendar extends Base {
       buffer.write(_DAYROW_TEMPLATE);
     }
     
-    body.append(dow);
-    body.appendHtml(buffer.toString(), treeSanitizer: const NullTreeSanitizer());
+    calBody.tBodies[0].append(dow);
+    _appendTableHtml(calBody, buffer.toString());
   }
+  
+  void _appendTableHtml(TableElement t, String html) {
+    t.tBodies[0].append(t.tBodies[0].createFragment('<table>$html</table>'));
+  }
+
   
   void _cell12View(List<String> labels) {
     Element body = (element.querySelector('.cnt') as TableElement).tBodies.first;

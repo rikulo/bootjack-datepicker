@@ -7,7 +7,6 @@ import 'dart:html';
 
 import 'package:intl/intl.dart';
 
-import 'package:rikulo_commons/html.dart';
 import 'package:dquery/dquery.dart';
 import 'package:bootjack/bootjack.dart';
 import 'package:bootjack/bootjack_plugin.dart' as p;
