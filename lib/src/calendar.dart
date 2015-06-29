@@ -310,11 +310,6 @@ class Calendar extends Base {
     _appendTableHtml(calBody, buffer.toString());
   }
   
-  void _appendTableHtml(TableElement t, String html) {
-    t.tBodies[0].append(t.tBodies[0].createFragment('<table>$html</table>'));
-  }
-
-  
   void _cell12View(List<String> labels) {
     Element body = (element.querySelector('.cnt') as TableElement).tBodies.first;
     Element cell12row = body.createFragment(_CELL12ROW_TEMPLATE).children[0];
@@ -584,6 +579,10 @@ class Calendar extends Base {
   void reset() {
     _currentValue = _value;
     _setView(DAY);
+  }
+  
+  static void _appendTableHtml(TableElement t, String html) {
+    t.tBodies[0].append(t.tBodies[0].createFragment('<table>$html</table>'));
   }
   
   // Data API //
