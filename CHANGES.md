@@ -2,6 +2,7 @@
 
 **0.5.6**
 * Fixed table content do not render correctly
+* Fixed mouse wheel event
 
 **0.5.5**
 * Support chang date view and shift date view event

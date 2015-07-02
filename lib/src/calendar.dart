@@ -172,11 +172,11 @@ class Calendar extends Base {
       }
     }
     
-    element.innerHtml = _CALENDAR_TEMPLATE;
+    element
+    ..innerHtml = _CALENDAR_TEMPLATE
+    ..onMouseWheel.listen(_doMousewheel);
     
     $(element)
-    ..on('mousewheel', _doMousewheel)
-        
     ..on('click', _changeView, selector: '.title')
     ..on('click', _clickArrow, selector: '.left-icon')
     ..on('click', _clickArrow, selector: '.right-icon')
@@ -449,10 +449,9 @@ class Calendar extends Base {
     
   }
   
-  void _doMousewheel(QueryEvent evt) {
-    WheelEvent wevt = evt.originalEvent;
-    _shiftView(wevt.deltaY > 0 ? 1: -1);
-    evt.stopPropagation();
+  void _doMousewheel(WheelEvent e) {
+    _shiftView(e.deltaY > 0 ? 1: -1);
+    e.stopPropagation();
   }
   
   void _clickArrow(QueryEvent evt) {
