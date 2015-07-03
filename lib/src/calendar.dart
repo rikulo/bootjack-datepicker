@@ -69,6 +69,8 @@ class Calendar extends Base {
   
   String _locale;
   
+  int _firstDayOfWeek;
+  
   String _view;
   
   DateFormat _dfmt;
@@ -134,19 +136,29 @@ class Calendar extends Base {
   
   /** Construct a calendar object, wired to [element].
    * 
+   * * [element] - the container to put the [Calendar].
+   * * [format] - the date format for output string, default: yyyy/MM/dd
+   * * [locale] - the date locale, default: [Intl.systemLocale]
+   * * [firstDayOfWeek] - the first day of week, 
+   * *   default: [DateFormat.dateSymbols.FIRSTDAYOFWEEK] from [locale]
+   * * [value] - the selected [DateTime] value
+   * * [dataTargetSelector] - the selector for [InputElement] to display date value
+   * * [newDate] - the function to create [DateTime] value when select
+   * 
    */
-  Calendar(Element element, {String format, String date, String locale, DateTime value, String dataTargetSelector, DateTime newDate(y,m,d)}) : 
+  Calendar(Element element, {String format, String date, String locale, int firstDayOfWeek,
+    DateTime value, String dataTargetSelector, DateTime newDate(y,m,d)}) : 
   this._format = _data(format, element, 'format', 'yyyy/MM/dd'),
   this._date = _data(date, element, 'date'),
   this._locale = _data(locale, element, 'date-locale', Intl.systemLocale),
   this._dataTargetSelector = _data(dataTargetSelector, element, 'target'),
+  this._firstDayOfWeek = firstDayOfWeek,
   this._value = value,
   this._currentValue = value,
   this._newDate = newDate,
   super(element, _NAME) {
     _initCalendar();
     _initDatepicker();
-    
   }
   
   /** Retrieve the wired Calendar object from an element. If there is no wired
@@ -160,6 +172,8 @@ class Calendar extends Base {
   
   void _initCalendar() {
     _dfmt = new DateFormat(this._format, this._locale);
+    if (_firstDayOfWeek == null)
+      _firstDayOfWeek = _dfmt.dateSymbols.FIRSTDAYOFWEEK;
     
     if (_date == null) {
       if (_value != null)
@@ -295,10 +309,10 @@ class Calendar extends Base {
     List<Element> children = dow.children;
     
     List<String> swkDays = _dfmt.dateSymbols.SHORTWEEKDAYS;
-    
+    int ofs = (_firstDayOfWeek + 1) % 7;
     //render week days
     for (int i = swkDays.length; --i >= 0;) {
-      children[i].text = swkDays[i];
+      children[i].text = swkDays[(i + ofs) % 7];
     }
     
     var buffer = new StringBuffer();
@@ -344,13 +358,12 @@ class Calendar extends Base {
     Element title = element.querySelector('.title');
     
     if (_view == DAY) {
-      
+      int ofs = (_firstDayOfWeek + 1) % 7;
       DateTime beginDate = _newDateTime(y, m, 1, true);
-      beginDate = beginDate.subtract(new Duration(days: beginDate.weekday));
+      beginDate = beginDate.subtract(new Duration(days: beginDate.weekday - ofs));
       
       bool inTodayRange = _inDayViewRange(beginDate, today);
       bool inSelectedDayRange = _value == null ? false: _inDayViewRange(beginDate, _value);
-      
       
       title.text = '${_dfmt.dateSymbols.SHORTMONTHS[m - 1]} $y';
       List<Element> dayrow = element.querySelectorAll('.dayrow');
@@ -358,7 +371,6 @@ class Calendar extends Base {
       for (Element e in outside) {
         e.classes.remove('outside');
       }
-      
       
       for (Element row in dayrow) {
         for (Element td in row.children) {
@@ -375,6 +387,7 @@ class Calendar extends Base {
               monofs = curY > y ? 1: -1;
             }
           }
+          $(td).data.set('monofs', monofs);
           
           if (inSelectedDayRange && beginDate.month == _value.month && beginDate.day == _value.day){
             td.classes.add('seld');
@@ -386,7 +399,6 @@ class Calendar extends Base {
             renderToDay(td);
           }
           
-          $(td).data.set('monofs', monofs);
           beginDate = _newDateTime(beginDate.year, beginDate.month, beginDate.day + 1, true);
         }
       }
