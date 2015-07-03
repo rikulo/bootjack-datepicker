@@ -1,5 +1,8 @@
 #CHANGES
 
+**0.5.7*
+* Fixed render first day of week with Sat 
+
 **0.5.6**
 * Fixed table content do not render correctly
 * Fixed mouse wheel event

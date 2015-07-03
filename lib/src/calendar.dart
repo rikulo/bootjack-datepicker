@@ -358,9 +358,13 @@ class Calendar extends Base {
     Element title = element.querySelector('.title');
     
     if (_view == DAY) {
-      int ofs = (_firstDayOfWeek + 1) % 7;
+      
       DateTime beginDate = _newDateTime(y, m, 1, true);
-      beginDate = beginDate.subtract(new Duration(days: beginDate.weekday - ofs));
+      int ofs = beginDate.weekday - ((_firstDayOfWeek + 1) % 7);
+      if (ofs < 0)
+        ofs += 7;
+      
+      beginDate = beginDate.subtract(new Duration(days: ofs));
       
       bool inTodayRange = _inDayViewRange(beginDate, today);
       bool inSelectedDayRange = _value == null ? false: _inDayViewRange(beginDate, _value);
