@@ -320,8 +320,9 @@ class Calendar extends Base {
       buffer.write(_DAYROW_TEMPLATE);
     }
     
-    calBody.tBodies[0].append(dow);
-    _appendTableHtml(calBody, buffer.toString());
+    calBody.tBodies[0]
+    ..append(dow)
+    ..appendHtml(buffer.toString(), treeSanitizer: NodeTreeSanitizer.trusted);
   }
   
   void _cell12View(List<String> labels) {
@@ -594,10 +595,6 @@ class Calendar extends Base {
   void reset() {
     _currentValue = _value;
     _setView(DAY);
-  }
-  
-  static void _appendTableHtml(TableElement t, String html) {
-    t.tBodies[0].append(t.tBodies[0].createFragment('<table>$html</table>'));
   }
   
   // Data API //
