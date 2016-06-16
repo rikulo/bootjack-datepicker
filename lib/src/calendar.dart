@@ -380,6 +380,7 @@ class Calendar extends Base {
       for (Element row in dayrow) {
         for (Element td in row.children) {
           td.text = '${beginDate.day}';
+          renderDay(td, beginDate);
           
           int monofs = 0;
           if (beginDate.month != m) {
@@ -412,6 +413,7 @@ class Calendar extends Base {
     } else {
       
       bool isMon = _view == MONTH;
+      int y = _value.year;
       int index = isMon? m - 1: y % 10 + 1;
       
       int yofs = 0;
@@ -424,25 +426,27 @@ class Calendar extends Base {
         yofs += 11;
       }
       
-      bool inSelectedDayRange = isNullValue ? false: _currentValue.year == _value.year;
+      bool inSelectedDayRange = isNullValue ? false: _currentValue.year == y;
       
       if (!isNullValue) {
         if (isMon) {
           index = _value.month - 1;
         } else {
-          inSelectedDayRange = (yofs - 11) <= _value.year && _value.year <= yofs;
-          index = _value.year  - yofs + 11;
+          inSelectedDayRange = (yofs - 11) <= y && y <= yofs;
+          index = y  - yofs + 11;
         }
-        
       }
-      
-         
+
       List<Element> cell12row = element.querySelectorAll('.cell12row span');
       for (int i = cell12row.length; --i >= 0; yofs--) {
+        Element cell = cell12row[i];
         if (!isMon)
-          cell12row[i].text = '$yofs';
+          cell.text = '$yofs';
+
+        DateTime date = isMon ? _newDateTime(y, i + 1, 1, true): _newDateTime(y + i, 1, 1, true);
+        renderDay(cell, date);
         if (inSelectedDayRange && index == i) {
-          cell12row[i].classes.add('seld');
+          cell.classes.add('seld');
           renderSelectedDay(cell12row[i]);
         }
       }
@@ -456,6 +460,10 @@ class Calendar extends Base {
     if (-42 < days && days < 1)
       return true;
     return false;
+  }
+
+  void renderDay(Element elem, DateTime date) {
+
   }
   
   void renderSelectedDay(Element elem) {
