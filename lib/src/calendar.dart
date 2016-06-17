@@ -76,7 +76,9 @@ class Calendar extends Base {
   DateFormat _dfmt;
   
   Function _newDate;
-  
+
+  String get view => _view;
+
   /**
    * The date format of the calendar value.
    */
@@ -413,7 +415,7 @@ class Calendar extends Base {
     } else {
       
       bool isMon = _view == MONTH;
-      int y = _value.year;
+      int valY = _value.year;
       int index = isMon? m - 1: y % 10 + 1;
       
       int yofs = 0;
@@ -426,14 +428,14 @@ class Calendar extends Base {
         yofs += 11;
       }
       
-      bool inSelectedDayRange = isNullValue ? false: _currentValue.year == y;
+      bool inSelectedDayRange = isNullValue ? false: _currentValue.year == valY;
       
       if (!isNullValue) {
         if (isMon) {
           index = _value.month - 1;
         } else {
-          inSelectedDayRange = (yofs - 11) <= y && y <= yofs;
-          index = y  - yofs + 11;
+          inSelectedDayRange = (yofs - 11) <= valY && valY <= yofs;
+          index = valY  - yofs + 11;
         }
       }
 
@@ -443,7 +445,7 @@ class Calendar extends Base {
         if (!isMon)
           cell.text = '$yofs';
 
-        DateTime date = isMon ? _newDateTime(y, i + 1, 1, true): _newDateTime(y + i, 1, 1, true);
+        DateTime date = isMon ? _newDateTime(valY, i + 1, 1, true): _newDateTime(valY + i, 1, 1, true);
         renderDay(cell, date);
         if (inSelectedDayRange && index == i) {
           cell.classes.add('seld');
