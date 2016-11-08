@@ -1,7 +1,10 @@
 #CHANGES
 
+**0.5.8*
+
 **0.5.7*
-* Fixed render first day of week with Sat 
+* Fixed render first day of week with Sat
+* Support timepicker
 
 **0.5.6**
 * Fixed table content do not render correctly
