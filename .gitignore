@@ -5,10 +5,6 @@
 /tool/packages
 /tool/lib/packages
 .pub
-.idea/.name
-.idea/compiler.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/workspace.xml
-.idea/copyright/profiles_settings.xml
+.idea
+*.iml
+.packages
