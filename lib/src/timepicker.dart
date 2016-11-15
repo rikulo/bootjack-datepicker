@@ -88,7 +88,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 
     //input.value count on
     //1. date, 2. time, 3. data attribute
-    this.time = _data(time, element, 'time', '00:00');
+    this.time = _data(time, element, 'time', '--:--');
     if (date != null) this.date = date;
 
     this.step = step;
@@ -107,16 +107,12 @@ class _TimePickerImpl extends Base implements TimePicker {
   /**
    * Get value of hour field.
    */
-  String get hour {
-    return '${_hour < 10 ? '0' : ''}$_hour';
-  }
+  String get hour => _hour == null ? '--' : '${_hour < 10 ? '0' : ''}$_hour';
 
   /**
    * Get value of minute field.
    */
-  String get minute {
-    return '${_minute < 10 ? '0' : ''}$_minute';
-  }
+  String get minute => _minute == null ? '--' : '${_minute < 10 ? '0' : ''}$_minute';
 
   void _highlightUnit(QueryEvent event) {
     int position = getCursorPosition();
@@ -141,12 +137,16 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   void incrementHour(bool add) {
+    if (_minute == null) _minute = 0;
+    _hour = _hour == null ? new DateTime.now().hour : _hour;
     _hour += add ? 1 : -1;
     if (_hour == MAXHOUR) _hour = 0;
     else if (_hour < 0) _hour = MAXHOUR - 1;
   }
 
   void incrementMinute(bool add) {
+    if (_hour == null) incrementHour(true);
+    _minute = _minute == null ? 0 : _minute;
     int newMin = _minute + (add ? 1 : -1) * step;
 
     if (newMin > 59 || newMin < 0) {
@@ -166,9 +166,9 @@ class _TimePickerImpl extends Base implements TimePicker {
       return;
     }
 
-    final parsedTime = parseTime(t);
-    _hour = parsedTime[0] >= MAXHOUR ? 0 : parsedTime[0];
-    _minute = parsedTime[1] >= MAXMINUTE ? 0 : parsedTime[1];
+    final parsedTime = parseTime(t, null);
+    _hour = parsedTime[0] == null ? null : parsedTime[0] >= MAXHOUR ? 0 : parsedTime[0];
+    _minute = parsedTime[1] == null ? null : parsedTime[1] >= MAXMINUTE ? 0 : parsedTime[1];
 
     _updateInput();
   }
@@ -177,6 +177,8 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   @override
   DateTime get date {
+    if (_hour == null || _minute == null) return null;
+
     //isUTC is true by default
     bool isUTC = !(_date?.isUtc == false);
     DateTime d = _date ?? new DateTime.now();
@@ -200,22 +202,25 @@ class _TimePickerImpl extends Base implements TimePicker {
     _updateInput();
   }
 
-  List<int> parseTime(String time) {
+  List<int> parseTime(String time, [int defaultValue = 0]) {
+    if (time == null || time.isEmpty)
+      return [null, null];
+
     final timeArray = time.replaceAll(_reNumFormat, '').split(':');
     int h, m;
 
     try {
-      h = _string2int(timeArray[0]);
+      h = _string2int(timeArray[0], defaultValue);
     } catch (e) {
       //array index out of bound
-      h = 0;
+      h = defaultValue;
     }
 
     try {
-      m = _string2int(timeArray[1]);
+      m = _string2int(timeArray[1], defaultValue);
     } catch (e) {
       //array index out of bound
-      m = 0;
+      m = defaultValue;
     }
     return [h, m];
   }
@@ -227,6 +232,7 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   void _fireChange(_) {
+    _updateInput();
     //trigger event
     $element.trigger('changeTime.bs.timepicker', data: {
       'time': time,
@@ -240,9 +246,9 @@ class _TimePickerImpl extends Base implements TimePicker {
    * Reset time picker to '00:00'
    */
   void reset() {
-    _hour = 0;
-    _minute = 0;
-    input.value = time;
+    _hour = null;
+    _minute = null;
+    _updateInput();
   }
 
   void _onKeydown(QueryEvent e) {
@@ -286,10 +292,11 @@ class _TimePickerImpl extends Base implements TimePicker {
   void _onInput(QueryEvent event) {
     int oldHour = _hour;
     //in order to get new _hour & _minute, we call setTime without update input.value
-    final parsedTime = parseTime(input.value);
+    final parsedTime = parseTime(input.value, 0);
     int newHour = parsedTime[0], newMinute = parsedTime[1];
 
     if (_highlightedUnit == HOUR) {
+      if (_minute == null) _minute = 0;
       if (newHour > MAXHOUR) {
         //not allow input hour > 24
         //change input.value to old value, and set cursor to previous position
@@ -303,6 +310,7 @@ class _TimePickerImpl extends Base implements TimePicker {
       } else
         _hour = newHour; //update _hour, so press RIGHT will update input.value with correct unit
     } else if (_highlightedUnit == MINUTE) {
+      if (_hour == null) incrementHour(true);
       if (newMinute >= 6) {
         _minute = newMinute == MAXMINUTE ? 0 : newMinute;
         _updateInput();
@@ -321,8 +329,8 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 }
 
-int _string2int(String s, [int defaultValue]) {
-  return int.parse(s, onError: (_) => defaultValue ?? 0);
+int _string2int(String s, [int defaultValue = 0]) {
+  return int.parse(s, onError: (_) => defaultValue);
 }
 
 /*
