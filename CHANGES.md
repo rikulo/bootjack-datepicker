@@ -1,6 +1,7 @@
 #CHANGES
 
 **0.5.8*
+* Timepicker support null value
 
 **0.5.7*
 * Fixed render first day of week with Sat
