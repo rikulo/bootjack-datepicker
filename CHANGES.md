@@ -2,6 +2,7 @@
 
 **0.5.8*
 * Timepicker support null value
+* Set time to null when keep pressing backspace
 
 **0.5.7*
 * Fixed render first day of week with Sat
