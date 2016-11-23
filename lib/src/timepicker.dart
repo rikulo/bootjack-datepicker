@@ -259,8 +259,16 @@ class _TimePickerImpl extends Base implements TimePicker {
     if (!isNum) {
       switch (key) {
         case KeyCode.BACKSPACE:
-          if (getCursorPosition() == 3 && !rangeSelected())
+        case KeyCode.DELETE:
+          int cursorPos = getCursorPosition();
+          //set time to null when hour or minute is cleared
+          if ((cursorPos == 3 || cursorPos == 0) && !rangeSelected()) {
+            _hour = null;
+            _minute = null;
             e.preventDefault();
+            highlightHour();
+            _updateInput();
+          }
           break;
         case KeyCode.TAB:
           _updateInput();
