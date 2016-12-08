@@ -415,7 +415,7 @@ class Calendar extends Base {
     } else {
       
       bool isMon = _view == MONTH;
-      int valY = _value.year;
+      int valY = (_value ?? _currentValue).year;
       int index = isMon? m - 1: y % 10 + 1;
       
       int yofs = 0;
