@@ -152,7 +152,7 @@ class Calendar extends Base {
     DateTime value, String dataTargetSelector, DateTime newDate(y,m,d)}) : 
   this._format = _data(format, element, 'format', 'yyyy/MM/dd'),
   this._date = _data(date, element, 'date'),
-  this._locale = _data(locale, element, 'date-locale', Intl.systemLocale),
+  this._locale = _data(locale, element, 'date-locale', Intl.defaultLocale),
   this._dataTargetSelector = _data(dataTargetSelector, element, 'target'),
   this._firstDayOfWeek = firstDayOfWeek,
   this._value = value,
