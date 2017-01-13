@@ -88,7 +88,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 
     //input.value count on
     //1. date, 2. time, 3. data attribute
-    this.time = _data(time, element, 'time', '--:--');
+    this.time = _data(time, element, 'time', '––:––');
     if (date != null) this.date = date;
 
     this.step = step;
@@ -107,12 +107,12 @@ class _TimePickerImpl extends Base implements TimePicker {
   /**
    * Get value of hour field.
    */
-  String get hour => _hour == null ? '--' : '${_hour < 10 ? '0' : ''}$_hour';
+  String get hour => _hour == null ? '––' : '${_hour < 10 ? '0' : ''}$_hour';
 
   /**
    * Get value of minute field.
    */
-  String get minute => _minute == null ? '--' : '${_minute < 10 ? '0' : ''}$_minute';
+  String get minute => _minute == null ? '––' : '${_minute < 10 ? '0' : ''}$_minute';
 
   void _highlightUnit(QueryEvent event) {
     int position = getCursorPosition();
