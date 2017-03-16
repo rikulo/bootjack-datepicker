@@ -1,6 +1,6 @@
 name: bootjack_datepicker
 version: 0.5.8+1
-author: 
+authors: 
 - Jimmy Shiau <jimmyshiau@potix.com>
 - Tom Yeh <tomyeh@rikulo.org>
 description: Bootjack datepicker component is a datepicker component of Bootjack.
