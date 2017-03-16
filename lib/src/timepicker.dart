@@ -48,7 +48,7 @@ abstract class TimePicker {
    * the default constructor with no optional parameter value is used.
    */
   static TimePicker wire(Element element, [TimePicker create()]) =>
-      p.wire(element, _NAME, p.fallback(create, () => () => new TimePicker(element)));
+      p.wire(element, _NAME, create ?? (() => new TimePicker(element)));
 
   // Data API //
   static bool _registered = false;
@@ -354,4 +354,4 @@ String _date2time(DateTime date, [String defaultValue]) {
 */
 
 _data(value, Element elem, String name, [defaultValue]) =>
-    p.fallback(value, () => elem.attributes["data-$name"], () => defaultValue);
+    value ?? elem.attributes["data-$name"] ?? defaultValue;

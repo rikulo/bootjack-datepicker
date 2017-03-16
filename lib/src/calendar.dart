@@ -170,7 +170,7 @@ class Calendar extends Base {
    * the default constructor with no optional parameter value is used.
    */
   static Calendar wire(Element element, [Calendar create()]) => 
-      p.wire(element, _NAME, p.fallback(create, () => () => new Calendar(element)));
+      p.wire(element, _NAME, create ?? (() => new Calendar(element)));
   
   void _initCalendar() {
     _dfmt = new DateFormat(this._format, this._locale);
@@ -625,4 +625,4 @@ class Calendar extends Base {
 }
 
 _data(value, Element elem, String name, [defaultValue]) =>
-    p.fallback(value, () => elem.attributes["data-$name"], () => defaultValue);
+    value ?? elem.attributes["data-$name"] ?? defaultValue;
