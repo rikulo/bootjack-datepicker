@@ -445,7 +445,7 @@ class Calendar extends Base {
         if (!isMon)
           cell.text = '$yofs';
 
-        DateTime date = isMon ? _newDateTime(valY, i + 1, 1, true): _newDateTime(valY + i, 1, 1, true);
+        DateTime date = isMon ? _newDateTime(valY, i + 1, 1, true): _newDateTime(yofs, 1, 1, true);
         renderDay(cell, date);
         if (inSelectedDayRange && index == i) {
           cell.classes.add('seld');

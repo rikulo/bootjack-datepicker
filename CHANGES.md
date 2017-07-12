@@ -1,5 +1,8 @@
 #CHANGES
 
+**0.5.9*
+* Fixed pass a wrong date when render year view
+
 **0.5.8*
 * Timepicker support null value
 * Set time to null when keep pressing backspace
