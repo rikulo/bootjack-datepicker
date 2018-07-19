@@ -564,7 +564,7 @@ class Calendar extends Base {
     evt.stopPropagation();
   }
   
-  void _setTime(int y, [int m, int d, bool readValue]) {
+  void _setTime(int y, [int m, int d, bool readValue = false]) {
     DateTime val = _currentValue != null ? _currentValue: _setDateValue(todayUtc());
     int year = y != null ? y  : val.year;
     int month = m != null ? m : val.month;
