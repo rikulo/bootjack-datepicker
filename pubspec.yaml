@@ -9,6 +9,7 @@ documentation: http://www.dartdocs.org/documentation/bootjack_datepicker/0.5.8
 environment:
   sdk: '>=2.0.0 <3.0.0'
 dependencies:
+  dquery: any
   bootjack: any
   intl: any
   rikulo_commons: any
