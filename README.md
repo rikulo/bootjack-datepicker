@@ -3,7 +3,7 @@
 Bootjack datepicker component is a datepicker component of [Bootjack](http://github.com/rikulo/bootjack).
 
 * [Home](http://rikulo.org)
-* [API Reference](http://www.dartdocs.org/documentation/bootjack_datepicker/0.5.8+1)
+* [API Reference](http://www.dartdocs.org/documentation/bootjack_datepicker/1.0.0)
 * [Git Repository](https://github.com/rikulo/bootjack-datepicker)
 * [Discussion](http://stackoverflow.com/questions/tagged/rikulo)
 * [Issues](https://github.com/rikulo/bootjack-datepicker/issues)

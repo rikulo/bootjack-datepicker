@@ -1,7 +1,7 @@
 part of bootjack_timepicker;
 
 abstract class TimePicker {
-  static const String _NAME = 'timepicker';
+  static const _name = 'timepicker';
 
   /** Construct a TimePicker object, wired to [element].
    *
@@ -48,7 +48,7 @@ abstract class TimePicker {
    * the default constructor with no optional parameter value is used.
    */
   static TimePicker wire(Element element, [TimePicker create()]) =>
-      p.wire(element, _NAME, create ?? (() => new TimePicker(element)));
+      p.wire(element, _name, create ?? (() => new TimePicker(element)));
 
   // Data API //
   static bool _registered = false;
@@ -67,17 +67,17 @@ abstract class TimePicker {
   }
 }
 
+enum _HighlightUnit {hour, minute}
+
 /** A time picker component.
  */
 class _TimePickerImpl extends Base implements TimePicker {
 
-  static const String HOUR = 'hour';
-  static const String MINUTE = 'minute';
-  static const int DEFAULT_STEP = 5;
-  static const int MAXHOUR = 24;
-  static const int MAXMINUTE = 60;
+  static const _defaultStep = 5;
+  static const _maxHour = 24;
+  static const _maxMinute = 60;
 
-  _TimePickerImpl(Element element, {String time, DateTime date, int step}) : super(element, TimePicker._NAME) {
+  _TimePickerImpl(Element element, {String time, DateTime date, int step}) : super(element, TimePicker._name) {
     $element
     ..on('keydown', _onKeydown)
     ..on('input', _onInput)
@@ -96,13 +96,13 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   InputElement get input => element as InputElement;
   int _hour, _minute, _step;
-  String _highlightedUnit;
+  _HighlightUnit _highlightedUnit;
 
   @override
-  int get step => _step ?? DEFAULT_STEP;
+  int get step => _step ?? _defaultStep;
 
   @override
-  set step(int s) => _step = s ?? DEFAULT_STEP;
+  set step(int s) => _step = s ?? _defaultStep;
 
   /**
    * Get value of hour field.
@@ -123,27 +123,32 @@ class _TimePickerImpl extends Base implements TimePicker {
     }
   }
 
-  void highlightNextUnit() => _highlightedUnit == MINUTE ? highlightHour() : highlightMinute();
+  void highlightNextUnit()
+    => _highlightedUnit == _HighlightUnit.minute ? highlightHour() : highlightMinute();
 
   //delay highlight to prevent unexpected browser behavior
+  @override
   void highlightHour() {
-    _highlightedUnit = HOUR;
+    _highlightedUnit = _HighlightUnit.hour;
     Timer.run(() => input.setSelectionRange(0, 2));
   }
 
+  @override
   void highlightMinute() {
-    _highlightedUnit = MINUTE;
+    _highlightedUnit = _HighlightUnit.minute;
     Timer.run(() => input.setSelectionRange(3, 5));
   }
 
+  @override
   void incrementHour(bool add) {
     if (_minute == null) _minute = 0;
     _hour = _hour == null ? new DateTime.now().hour : _hour;
     _hour += add ? 1 : -1;
-    if (_hour == MAXHOUR) _hour = 0;
-    else if (_hour < 0) _hour = MAXHOUR - 1;
+    if (_hour == _maxHour) _hour = 0;
+    else if (_hour < 0) _hour = _maxHour - 1;
   }
 
+  @override
   void incrementMinute(bool add) {
     if (_hour == null) incrementHour(true);
     _minute = _minute == null ? 0 : _minute;
@@ -167,8 +172,8 @@ class _TimePickerImpl extends Base implements TimePicker {
     }
 
     final parsedTime = parseTime(t, null);
-    _hour = parsedTime[0] == null ? null : parsedTime[0] >= MAXHOUR ? 0 : parsedTime[0];
-    _minute = parsedTime[1] == null ? null : parsedTime[1] >= MAXMINUTE ? 0 : parsedTime[1];
+    _hour = parsedTime[0] == null ? null : parsedTime[0] >= _maxHour ? 0 : parsedTime[0];
+    _minute = parsedTime[1] == null ? null : parsedTime[1] >= _maxMinute ? 0 : parsedTime[1];
 
     _updateInput();
   }
@@ -275,12 +280,15 @@ class _TimePickerImpl extends Base implements TimePicker {
           break;
         case KeyCode.UP:
         case KeyCode.DOWN:
-          if (_highlightedUnit == HOUR) {
-            incrementHour(key == KeyCode.UP);
-            highlightHour();
-          } else if (_highlightedUnit == MINUTE) {
-            incrementMinute(key == KeyCode.UP);
-            highlightMinute();
+          switch(_highlightedUnit) {
+            case _HighlightUnit.hour:
+              incrementHour(key == KeyCode.UP);
+              highlightHour();
+              break;
+            case _HighlightUnit.minute:
+              incrementMinute(key == KeyCode.UP);
+              highlightMinute();
+              break;
           }
           _updateInput();
           break;
@@ -303,28 +311,31 @@ class _TimePickerImpl extends Base implements TimePicker {
     final parsedTime = parseTime(input.value, 0);
     int newHour = parsedTime[0], newMinute = parsedTime[1];
 
-    if (_highlightedUnit == HOUR) {
-      if (_minute == null) _minute = 0;
-      if (newHour > MAXHOUR) {
-        //not allow input hour > 24
-        //change input.value to old value, and set cursor to previous position
-        _hour = oldHour;
-        input.value = '$_hour:$minute';
-        input.setSelectionRange(1, 1);
-      } else if (newHour >= 3) {
-        _hour = newHour == MAXHOUR ? 0 : newHour;
-        _updateInput(); //update input.value with legal format (ex. two digit for every unit)
-        highlightNextUnit();
-      } else
-        _hour = newHour; //update _hour, so press RIGHT will update input.value with correct unit
-    } else if (_highlightedUnit == MINUTE) {
-      if (_hour == null) incrementHour(true);
-      if (newMinute >= 6) {
-        _minute = newMinute == MAXMINUTE ? 0 : newMinute;
-        _updateInput();
-        highlightMinute();
-      } else
-        _minute = newMinute;
+    switch(_highlightedUnit) {
+      case _HighlightUnit.hour:
+        if (_minute == null) _minute = 0;
+        if (newHour > _maxHour) {
+          //not allow input hour > 24
+          //change input.value to old value, and set cursor to previous position
+          _hour = oldHour;
+          input.value = '$_hour:$minute';
+          input.setSelectionRange(1, 1);
+        } else if (newHour >= 3) {
+          _hour = newHour == _maxHour ? 0 : newHour;
+          _updateInput(); //update input.value with legal format (ex. two digit for every unit)
+          highlightNextUnit();
+        } else
+          _hour = newHour; //update _hour, so press RIGHT will update input.value with correct unit
+        break;
+      case _HighlightUnit.minute:
+        if (_hour == null) incrementHour(true);
+        if (newMinute >= 6) {
+          _minute = newMinute == _maxMinute ? 0 : newMinute;
+          _updateInput();
+          highlightMinute();
+        } else
+          _minute = newMinute;
+        break;
     }
   }
 
@@ -338,7 +349,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 }
 
 int _string2int(String s, [int defaultValue = 0]) {
-  return int.parse(s, onError: (_) => defaultValue);
+  return int.tryParse(s) ?? defaultValue;
 }
 
 /*

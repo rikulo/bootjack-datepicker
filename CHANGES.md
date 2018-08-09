@@ -1,5 +1,8 @@
 #CHANGES
 
+**1.0.0**
+* Dart 2 required
+
 **0.5.9*
 * Fixed pass a wrong date when render year view
 

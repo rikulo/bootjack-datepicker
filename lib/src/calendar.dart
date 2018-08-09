@@ -3,13 +3,13 @@ part of bootjack_datepicker;
 /** A calendar component.
  */
 class Calendar extends Base {
-  static const String _NAME = 'calendar';
+  static const _name = 'calendar';
   
-  static const String DAY = 'day';
-  static const String MONTH = 'month';
-  static const String YEAR = 'year';
+  static const day = 'day';
+  static const month = 'month';
+  static const year = 'year';
   
-  static const String _CALENDAR_TEMPLATE = '''
+  static const _calendarTemplate = '''
 <table class="cnt" width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="header">
     <th colspan="7">
@@ -20,7 +20,7 @@ class Calendar extends Base {
   </tr>
 </table>
 ''';
-  static const String _DOW_TEMPLATE = '''
+  static const _dowTemplate = '''
 <tr class="dow">
   <th class="wkend"></th>
   <th class="wkday"></th>
@@ -31,7 +31,7 @@ class Calendar extends Base {
   <th class="wkend"></th>
 </tr>
 ''';
-  static const String _DAYROW_TEMPLATE = '''
+  static const _dayrowTemplate = '''
 <tr class="dayrow">
   <td class="wkend"></td>
   <td class="wkday"></td>
@@ -42,7 +42,7 @@ class Calendar extends Base {
   <td class="wkend"></td>
 </tr>
 ''';
-  static const String _CELL12ROW_TEMPLATE = '''
+  static const _cell12rowTemplate = '''
 <tr class="cell12row">
   <td colspan="7">
     <span></span>
@@ -158,7 +158,7 @@ class Calendar extends Base {
   this._value = value,
   this._currentValue = value,
   this._newDate = newDate,
-  super(element, _NAME) {
+  super(element, _name) {
     _initCalendar();
     _initDatepicker();
   }
@@ -170,7 +170,7 @@ class Calendar extends Base {
    * the default constructor with no optional parameter value is used.
    */
   static Calendar wire(Element element, [Calendar create()]) => 
-      p.wire(element, _NAME, create ?? (() => new Calendar(element)));
+      p.wire(element, _name, create ?? (() => new Calendar(element)));
   
   void _initCalendar() {
     _dfmt = new DateFormat(this._format, this._locale);
@@ -189,7 +189,7 @@ class Calendar extends Base {
     }
     
     element
-    ..innerHtml = _CALENDAR_TEMPLATE
+    ..innerHtml = _calendarTemplate
     ..onMouseWheel.listen(_doMousewheel);
     
     $(element)
@@ -199,7 +199,7 @@ class Calendar extends Base {
     
     ..on('click', _clickDate, selector: '.dayrow td, .cell12row span');
     
-    _setView(DAY);
+    _setView(day);
   }
   
   void _initDatepicker() {
@@ -212,7 +212,7 @@ class Calendar extends Base {
   }
   
   void _onCalChange(QueryEvent e) {//cal value to elements 
-    if (_view != Calendar.DAY) return;
+    if (_view != Calendar.day) return;
     
     if (_dataTargetSelector != null) {
       
@@ -284,13 +284,13 @@ class Calendar extends Base {
     
     this._view = view;
     switch (view) {
-    case DAY:
+    case day:
       _dayView();
       break;
-    case MONTH:
+    case month:
       _cell12View(_dfmt.dateSymbols.SHORTMONTHS);
       break;
-    case YEAR:
+    case year:
       List<String> labels = [];
       int y = _currentValue.year;
       int yofs = y - (y % 10 + 1);
@@ -307,7 +307,7 @@ class Calendar extends Base {
   
   void _dayView() {
     TableElement calBody = element.querySelector('.cnt');
-    Element dow = calBody.tBodies[0].createFragment(_DOW_TEMPLATE).children[0];
+    Element dow = calBody.tBodies[0].createFragment(_dowTemplate).children[0];
     List<Element> children = dow.children;
     
     List<String> swkDays = _dfmt.dateSymbols.SHORTWEEKDAYS;
@@ -319,7 +319,7 @@ class Calendar extends Base {
     
     var buffer = new StringBuffer();
     for (int i = 6; --i >= 0;) {
-      buffer.write(_DAYROW_TEMPLATE);
+      buffer.write(_dayrowTemplate);
     }
     
     calBody.tBodies[0]
@@ -329,7 +329,7 @@ class Calendar extends Base {
   
   void _cell12View(List<String> labels) {
     Element body = (element.querySelector('.cnt') as TableElement).tBodies.first;
-    Element cell12row = body.createFragment(_CELL12ROW_TEMPLATE).children[0];
+    Element cell12row = body.createFragment(_cell12rowTemplate).children[0];
     List<Element> children = cell12row.children.first.children;
     
     //render month
@@ -360,7 +360,7 @@ class Calendar extends Base {
     
     Element title = element.querySelector('.title');
     
-    if (_view == DAY) {
+    if (_view == day) {
       
       DateTime beginDate = _newDateTime(y, m, 1, true);
       int ofs = beginDate.weekday - ((_firstDayOfWeek + 1) % 7);
@@ -414,7 +414,7 @@ class Calendar extends Base {
       
     } else {
       
-      bool isMon = _view == MONTH;
+      bool isMon = _view == month;
       int valY = (_value ?? _currentValue).year;
       int index = isMon? m - 1: y % 10 + 1;
       
@@ -489,14 +489,14 @@ class Calendar extends Base {
   
   void _shiftView(int ofs) {
     switch (this._view) {
-    case DAY:
-      _shiftDate(MONTH, ofs);
+    case day:
+      _shiftDate(month, ofs);
       break;
-    case MONTH:
-      _shiftDate(YEAR, ofs);
+    case month:
+      _shiftDate(year, ofs);
       break;
-    case YEAR:
-      _shiftDate(YEAR, ofs * 10);
+    case year:
+      _shiftDate(year, ofs * 10);
       break;
     }
     _markCal();
@@ -512,14 +512,14 @@ class Calendar extends Base {
     int d = val.day;
     bool nofix = false;
     switch(opt) {
-    case DAY :
+    case day :
       d += ofs;
       nofix = true;
       break;
-    case MONTH :
+    case month :
       m += ofs;
       break;
-    case YEAR :
+    case year :
       y += ofs;
       break;
     }
@@ -531,13 +531,13 @@ class Calendar extends Base {
   
   void _changeView(QueryEvent evt) {
     switch (this._view) {
-      case DAY:
-        _setView(MONTH);
+      case day:
+        _setView(month);
         break;
-      case MONTH:
-        _setView(YEAR);
+      case month:
+        _setView(year);
         break;
-      case YEAR:
+      case year:
         break;
     }
     evt.stopPropagation();
@@ -548,17 +548,17 @@ class Calendar extends Base {
     
     ElementQuery target = $(evt.target);
     switch (this._view) {
-    case DAY:
+    case day:
       _setTime(null, (val.month + target.data.get("monofs")),  int.parse(target.html), true);
       _markCal();
       break;
-    case MONTH:
+    case month:
       _setTime(null, $('.cell12row span').indexOf(evt.target) + 1);
-      _setView(DAY);
+      _setView(day);
       break;
-    case YEAR:
+    case year:
       _setTime(int.parse(target.html));
-      _setView(MONTH);
+      _setView(month);
       break;
     }
     evt.stopPropagation();
@@ -604,7 +604,7 @@ class Calendar extends Base {
    */
   void reset() {
     _currentValue = _value;
-    _setView(DAY);
+    _setView(day);
   }
   
   // Data API //
