@@ -100,6 +100,10 @@ class Calendar extends Base {
       _dfmt = new DateFormat(_format, _locale);
     }
   }
+
+  void set firstDayOfWeek(int firstDayOfWeek) {
+    _firstDayOfWeek = firstDayOfWeek;
+  }
   
   /**
    * The text value of selected date.

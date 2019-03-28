@@ -1,5 +1,8 @@
 #CHANGES
 
+**1.0.1**
+* Support set firstDayOfWeek
+
 **1.0.0**
 * Dart 2 required
 
