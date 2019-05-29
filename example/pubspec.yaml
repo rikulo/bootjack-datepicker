@@ -1,0 +1,13 @@
+name: bootjack_datepicker_example_app
+description: A web app example for bootjack_datepicker.
+
+environment:
+  sdk: ">=2.2.1-dev.2.0 <3.0.0"
+
+dependencies:
+  bootjack_datepicker:
+    path: ../
+
+dev_dependencies:
+  build_runner: '>=1.3.0 <2.0.0'
+  build_web_compilers: '>=1.0.0 <3.0.0'

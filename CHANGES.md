@@ -2,6 +2,7 @@
 
 **1.0.1**
 * Support set firstDayOfWeek
+* Timepicker support AM/PM
 
 **1.0.0**
 * Dart 2 required

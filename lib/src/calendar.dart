@@ -621,7 +621,7 @@ class Calendar extends Base {
     _registered = true;
     
     $window().on('load', (QueryEvent e) {
-      for (Element elem in $('[class~="calendar"]')) {
+      for (final elem in $('[class~="calendar"]')) {
         Calendar.wire(elem);
       }
     });
