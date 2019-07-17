@@ -1,5 +1,8 @@
 #CHANGES
 
+**1.0.2**
+* Fixed wrong cursor position when type 00 in hour field
+
 **1.0.1**
 * Support set firstDayOfWeek
 * Timepicker support AM/PM

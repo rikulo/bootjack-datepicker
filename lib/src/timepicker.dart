@@ -98,7 +98,7 @@ class _TimePickerImpl extends Base implements TimePicker {
     ..on('focus click', _highlightUnit)
     ..on('blur', _fireChange);
 
-    this.enable24HourTime = enable24HourTime;
+    this.enable24HourTime = enable24HourTime ?? element.dataset['date-24'] == 'true';
     this.locale = _data(locale, element, 'date-locale', Intl.systemLocale);
 
 
@@ -247,9 +247,12 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   @override
-  String get time => _in24Hour ? '$hour:$minute':
-    '${_hour == null ? _emptyVal: _hour == 0 ? '12':
-        _hour > 12 ? '${_hour < 22 ? '0': ''}${_hour - 12}': hour}:$minute ${_ampms[_ampmIndex]}';
+  String get time {
+    _syncAmPm();
+    return _in24Hour ? '$hour:$minute':
+      '${_hour == null ? _emptyVal: _hour == 0 ? '12':
+      _hour > 12 ? '${_hour < 22 ? '0': ''}${_hour - 12}': hour}:$minute ${_ampms[_ampmIndex]}';
+  }
 
   @override
   void set time(String t) {
@@ -410,7 +413,9 @@ class _TimePickerImpl extends Base implements TimePicker {
     switch(_highlightedUnit) {
       case _HighlightUnit.hour:
         if (_minute == null) _minute = 0;
-        if (newHour > _maxHour) {
+        if (newHour == null)
+          _hour = null;
+        else if (newHour > _maxHour) {
           //not allow input hour > 24
           //change input.value to old value, and set cursor to previous position
           _hour = oldHour;
@@ -421,8 +426,14 @@ class _TimePickerImpl extends Base implements TimePicker {
           _hour = newHour == _maxHour ? 0 : newHour;
           _updateInput(); //update input.value with legal format (ex. two digit for every unit)
           highlightNextUnit(true);
-        } else
+        } else {
           _hour = newHour; //update _hour, so press RIGHT will update input.value with correct unit
+          if (val.length > 1) {
+            _updateInput(); //update input.value with legal format (ex. two digit for every unit)
+            highlightNextUnit(true);
+          }
+        }
+
         break;
       case _HighlightUnit.minute:
         if (_hour == null) incrementHour(true);
