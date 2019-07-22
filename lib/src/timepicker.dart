@@ -169,10 +169,18 @@ class _TimePickerImpl extends Base implements TimePicker {
   void highlightNextUnit(bool right) {
     switch(_highlightedUnit) {
       case _HighlightUnit.hour:
-        _in24Hour || right ? highlightMinute(): highlightAmPm();
+        if (right)
+          highlightMinute();
+        else if (!_in24Hour)
+          highlightAmPm();
         break;
       case _HighlightUnit.minute:
-        _in24Hour || !right ? highlightHour(): highlightAmPm();
+        if (!right)
+          highlightHour();
+        else if (!_in24Hour)
+          highlightAmPm();
+        else
+          highlightMinute();
         break;
       case _HighlightUnit.ampm:
         if (!_in24Hour) //just in case
@@ -360,12 +368,19 @@ class _TimePickerImpl extends Base implements TimePicker {
         case KeyCode.DELETE:
           int cursorPos = getCursorPosition();
           //set time to null when hour or minute is cleared
-          if ((cursorPos == 3 || cursorPos == 0) && !rangeSelected()) {
-            _hour = null;
-            _minute = null;
-            e.preventDefault();
-            highlightHour();
-            _updateInput();
+          if (!rangeSelected()) {
+            if (cursorPos == 3 || cursorPos == 0) {
+              _hour = null;
+              _minute = null;
+              e.preventDefault();
+              highlightHour();
+              _updateInput();
+            } else if (cursorPos == 6) {
+              e.preventDefault();
+              _ampmIndex = 0;
+              _updateInput();
+              highlightMinute();
+            }
           }
           break;
         case KeyCode.TAB:
@@ -404,57 +419,71 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   void _onInput(QueryEvent event) {
-    int oldHour = _hour;
     //in order to get new _hour & _minute, we call setTime without update input.value
     final val = input.value,
           parsedTime = parseTime(val, 0),
+          parsedText = val.replaceAll(_reNumFormat, '').split(':'),
           newHour = parsedTime[0], newMinute = parsedTime[1];
 
     switch(_highlightedUnit) {
       case _HighlightUnit.hour:
         if (_minute == null) _minute = 0;
-        if (newHour == null)
-          _hour = null;
-        else if (newHour > _maxHour) {
-          //not allow input hour > 24
-          //change input.value to old value, and set cursor to previous position
-          _hour = oldHour;
-          //input.value = '$_hour:$minute';
-          _updateInput();
-          input.setSelectionRange(1, 1);
-        } else if (newHour >= 3) {
-          _hour = newHour == _maxHour ? 0 : newHour;
-          _updateInput(); //update input.value with legal format (ex. two digit for every unit)
-          highlightNextUnit(true);
-        } else {
-          _hour = newHour; //update _hour, so press RIGHT will update input.value with correct unit
-          if (val.replaceAll(_reNumFormat, '').split(':')[0].length > 1) {
-            _updateInput(); //update input.value with legal format (ex. two digit for every unit)
-            highlightNextUnit(true);
-          }
+        if (newHour == null)//empty string case
+          _hour = 0;
+        else {
+          final shallAppend0 = _in24Hour ? 2 : 1;
+          _updateTime(newHour, _maxHour,
+            save: (final val) => _hour = val,
+            shallHighlight: newHour > shallAppend0
+              || parsedText[0].length > 1);
         }
-
         break;
       case _HighlightUnit.minute:
         if (_hour == null) incrementHour(true);
-        if (newMinute >= 6) {
-          _minute = newMinute == _maxMinute ? 0 : newMinute;
-          _updateInput();
-          highlightMinute();
-        } else
-          _minute = newMinute;
+
+        _updateTime(newMinute, _maxMinute,
+            save: (final val) => _minute = val,
+            shallHighlight: newMinute > 5
+              || parsedText[1].length > 1);
         break;
       case _HighlightUnit.ampm:
-        if (!_in24Hour && val.length > 7) {//just in case
-          if (_hour == null) incrementHour(true);
-          final newAmPm = val.substring(6).toLowerCase(),
-                nextAnPm = (_ampmIndex + 1)%2;
+        if (!_in24Hour) {
+          if (val.length > 6) {
+            if (_hour == null) incrementHour(true);
+            final newAmPm = val.substring(6).toLowerCase(),
+                  nextAnPm = (_ampmIndex + 1)%2;
 
-          if (!_ampms[_ampmIndex].toLowerCase().startsWith(newAmPm)
-              && _ampms[nextAnPm].toLowerCase().startsWith(newAmPm))
-            toggleAmPm();
+            if (newAmPm == 'a') {
+              if (_hour >= 12)
+                toggleAmPm();
+              _updateInput();
+              highlightAmPm();
+            } else if (newAmPm == 'p') {
+              if (_hour <= 12)
+                toggleAmPm();
+              _updateInput();
+              highlightAmPm();
+            } else if (!_ampms[_ampmIndex].toLowerCase().startsWith(newAmPm)
+                && _ampms[nextAnPm].toLowerCase().startsWith(newAmPm))
+              toggleAmPm();
+          } else {
+          }
+        }
+
+        if (!_in24Hour && val.length > 7) {//just in case
+
         }
         break;
+    }
+  }
+
+
+  void _updateTime(int value, int max, {bool shallHighlight, void save(int value)}) {
+    value = value >= max ? max - 1: value;
+    save(value);
+    if (shallHighlight) {
+      _updateInput();
+      highlightNextUnit(true);
     }
   }
 
