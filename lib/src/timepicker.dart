@@ -358,11 +358,15 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   void _onKeydown(QueryEvent e) {
-    final key = e.keyCode;
-    final isNum = (key >= KeyCode.ZERO && key <= KeyCode.NINE) ||
+    final key = e.keyCode,
+          inAmPm = _highlightedUnit == _HighlightUnit.ampm,
+          isNum = (key >= KeyCode.ZERO && key <= KeyCode.NINE) ||
                   key >= KeyCode.NUM_ZERO && key <= KeyCode.NUM_NINE;
     //prevent typing any character except numbers
-    if (!isNum) {
+    if (isNum) {
+      if (inAmPm)
+        e.preventDefault();
+    } else {
       switch (key) {
         case KeyCode.BACKSPACE:
         case KeyCode.DELETE:
@@ -411,7 +415,7 @@ class _TimePickerImpl extends Base implements TimePicker {
           break;
         default:
           //prevent typing characters
-          if (_highlightedUnit != _HighlightUnit.ampm)
+          if (!inAmPm)
             e.preventDefault();
           break;
       }
