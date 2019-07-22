@@ -363,10 +363,7 @@ class _TimePickerImpl extends Base implements TimePicker {
           isNum = (key >= KeyCode.ZERO && key <= KeyCode.NINE) ||
                   key >= KeyCode.NUM_ZERO && key <= KeyCode.NUM_NINE;
     //prevent typing any character except numbers
-    if (isNum) {
-      if (inAmPm)
-        e.preventDefault();
-    } else {
+    if (!isNum) {
       switch (key) {
         case KeyCode.BACKSPACE:
         case KeyCode.DELETE:
@@ -454,22 +451,22 @@ class _TimePickerImpl extends Base implements TimePicker {
         if (!_in24Hour) {
           if (val.length > 6) {
             if (_hour == null) incrementHour(true);
-            final newAmPm = val.substring(6).toLowerCase(),
-                  nextAnPm = (_ampmIndex + 1)%2;
+            final newAmPm = val.substring(6).toLowerCase();
 
-            if (newAmPm == 'a') {
+            if (newAmPm == 'a' || newAmPm == _ampms[0].toLowerCase()[0]) {
               if (_hour >= 12)
                 toggleAmPm();
               _updateInput();
               highlightAmPm();
-            } else if (newAmPm == 'p') {
-              if (_hour <= 12)
+            } else if (newAmPm == 'p' || newAmPm == _ampms[1].toLowerCase()[0]) {
+              if (_hour < 12 || _hour == 0)
                 toggleAmPm();
               _updateInput();
               highlightAmPm();
-            } else if (!_ampms[_ampmIndex].toLowerCase().startsWith(newAmPm)
-                && _ampms[nextAnPm].toLowerCase().startsWith(newAmPm))
-              toggleAmPm();
+            } else {
+              _updateInput();
+              highlightAmPm();
+            }
           } else {
           }
         }
