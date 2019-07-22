@@ -2,6 +2,7 @@
 
 **1.0.2**
 * Fixed wrong cursor position when type 00 in hour field
+* Keep focus in hour field if only type 1 digit
 
 **1.0.1**
 * Support set firstDayOfWeek

@@ -428,7 +428,7 @@ class _TimePickerImpl extends Base implements TimePicker {
           highlightNextUnit(true);
         } else {
           _hour = newHour; //update _hour, so press RIGHT will update input.value with correct unit
-          if (val.length > 1) {
+          if (val.replaceAll(_reNumFormat, '').split(':')[0].length > 1) {
             _updateInput(); //update input.value with legal format (ex. two digit for every unit)
             highlightNextUnit(true);
           }
