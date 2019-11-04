@@ -316,6 +316,10 @@ class _TimePickerImpl extends Base implements TimePicker {
 
     try {
       h = _string2int(timeArray[0], defaultValue);
+      if (!_in24Hour && h > 12) {
+        final m = h%10;
+        return [1, m > 5? m: m*10];
+      }
     } catch (e) {
       //array index out of bound
       h = defaultValue;
@@ -434,7 +438,10 @@ class _TimePickerImpl extends Base implements TimePicker {
         else {
           final shallAppend0 = _in24Hour ? 2 : 1;
           _updateTime(newHour, _maxHour,
-            save: (final val) => _hour = val,
+            save: (final val) {
+              _hour = val;
+              _minute = newMinute;
+            },
             shallHighlight: newHour > shallAppend0
               || parsedText[0].length > 1);
         }
