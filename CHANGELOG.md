@@ -4,6 +4,7 @@
 * Fixed wrong cursor position when type 00 in hour field
 * Keep focus in hour field if only type 1 digit
 * Don't parse `18` to 6 pm, it shall be 01:08 am
+* Timepicker support mouse scrolling to set time
 
 **1.0.1**
 * Support set firstDayOfWeek

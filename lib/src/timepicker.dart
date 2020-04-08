@@ -98,6 +98,8 @@ class _TimePickerImpl extends Base implements TimePicker {
     ..on('focus click', _highlightUnit)
     ..on('blur', _fireChange);
 
+    element.onMouseWheel.listen(_doMousewheel);
+
     this.enable24HourTime = enable24HourTime ?? element.dataset['date-24'] == 'true';
     this.locale = _data(locale, element, 'date-locale', Intl.systemLocale);
 
@@ -361,6 +363,11 @@ class _TimePickerImpl extends Base implements TimePicker {
     _updateInput();
   }
 
+  void _doMousewheel(WheelEvent e) {
+    _nextTimeStep(e.deltaY > 0);
+    e.stopPropagation();
+  }
+
   void _onKeydown(QueryEvent e) {
     final key = e.keyCode,
           inAmPm = _highlightedUnit == _HighlightUnit.ampm,
@@ -393,21 +400,7 @@ class _TimePickerImpl extends Base implements TimePicker {
           break;
         case KeyCode.UP:
         case KeyCode.DOWN:
-          switch(_highlightedUnit) {
-            case _HighlightUnit.hour:
-              incrementHour(key == KeyCode.UP);
-              highlightHour();
-              break;
-            case _HighlightUnit.minute:
-              incrementMinute(key == KeyCode.UP);
-              highlightMinute();
-              break;
-            case _HighlightUnit.ampm:
-              highlightAmPm();
-              toggleAmPm();
-              break;
-          }
-          _updateInput();
+          _nextTimeStep(key == KeyCode.UP);
           break;
         case KeyCode.LEFT:
         case KeyCode.RIGHT:
@@ -421,6 +414,24 @@ class _TimePickerImpl extends Base implements TimePicker {
           break;
       }
     }
+  }
+
+  void _nextTimeStep(bool add) {
+    switch(_highlightedUnit) {
+      case _HighlightUnit.hour:
+        incrementHour(add);
+        highlightHour();
+        break;
+      case _HighlightUnit.minute:
+        incrementMinute(add);
+        highlightMinute();
+        break;
+      case _HighlightUnit.ampm:
+        highlightAmPm();
+        toggleAmPm();
+        break;
+    }
+    _updateInput();
   }
 
   void _onInput(QueryEvent event) {
