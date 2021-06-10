@@ -363,9 +363,17 @@ class _TimePickerImpl extends Base implements TimePicker {
     _updateInput();
   }
 
-  void _doMousewheel(WheelEvent e) {
-    _nextTimeStep(e.deltaY > 0);
-    e.stopPropagation();
+  DateTime _wheelWhen;
+  void _doMousewheel(WheelEvent event) {
+    final now = new DateTime.now();
+    //shift too fast for trackpad
+    if (_wheelWhen == null
+        || now.difference(_wheelWhen).inMilliseconds > 200) {
+      _wheelWhen = now;
+      _nextTimeStep(event.deltaY > 0);
+    }
+    event.stopPropagation();
+    event.preventDefault();
   }
 
   void _onKeydown(QueryEvent e) {

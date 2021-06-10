@@ -479,10 +479,18 @@ class Calendar extends Base {
   void renderToDay(Element elem) {
     
   }
-  
-  void _doMousewheel(WheelEvent e) {
-    _shiftView(e.deltaY > 0 ? 1: -1);
-    e.stopPropagation();
+
+  DateTime _wheelWhen;
+  void _doMousewheel(WheelEvent event) {
+    final now = new DateTime.now();
+    //shift too fast for trackpad
+    if (_wheelWhen == null
+        || now.difference(_wheelWhen).inMilliseconds > 200) {
+      _wheelWhen = now;
+      _shiftView(event.deltaY > 0 ? 1: -1);
+    }
+    event.stopPropagation();
+    event.preventDefault();
   }
   
   void _clickArrow(QueryEvent evt) {
