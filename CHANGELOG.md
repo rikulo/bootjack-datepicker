@@ -2,6 +2,7 @@
 
 **1.0.3**
 * Slow down scrolling speed for Trackpad
+* Fixed render customize cell error
 
 **1.0.2**
 * Fixed wrong cursor position when type 00 in hour field

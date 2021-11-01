@@ -561,7 +561,7 @@ class Calendar extends Base {
     ElementQuery target = $(evt.target);
     switch (this._view) {
     case day:
-      _setTime(null, (val.month + target.data.get("monofs")),  int.parse(target.html), true);
+      _setTime(null, (val.month + target.data.get("monofs")),  int.parse(target.text), true);
       _markCal();
       break;
     case month:
@@ -569,7 +569,7 @@ class Calendar extends Base {
       _setView(day);
       break;
     case year:
-      _setTime(int.parse(target.html));
+      _setTime(int.parse(target.text));
       _setView(month);
       break;
     }
