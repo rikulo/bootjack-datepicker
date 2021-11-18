@@ -63,19 +63,20 @@ class Calendar extends Base {
 
   String _format;
   
-  DateTime _value, _currentValue;
+  DateTime? _value, _currentValue;
   
-  String _date;
+  String? _date;
   
   String _locale;
-  
-  int _firstDayOfWeek;
+
+  late int _firstDayOfWeek;
+  int? _defaultFirstDayOfWeek;
   
   String _view;
+
+  late DateFormat _dfmt;
   
-  DateFormat _dfmt;
-  
-  Function _newDate;
+  Function? _newDate;
 
   String get view => _view;
 
@@ -86,7 +87,7 @@ class Calendar extends Base {
   void set format(String format) {
     if (_format != format) {
       _format = format;
-      _dfmt = new DateFormat(_format, _locale);
+      _dfmt = DateFormat(_format, _locale);
     }
   }
   
@@ -97,7 +98,7 @@ class Calendar extends Base {
   void set locale(String locale) {
     if (_locale != locale) {
       _locale = locale;
-      _dfmt = new DateFormat(_format, _locale);
+      _dfmt = DateFormat(_format, _locale);
     }
   }
 
@@ -108,17 +109,16 @@ class Calendar extends Base {
   /**
    * The text value of selected date.
    */
-  String get date => _date;
-  void set date(String date) {
+  String? get date => _date;
+  void set date(String? date) {
     if (_date != date) {
       _date = date;
-      if (_dfmt != null) {
-        try {
+      try {
+        if (date != null)
           _value = _currentValue = _setDateValue(_dfmt.parse(date));
-          _markCal();
-        } on FormatException catch (_) {
-          //_value = null; keep previous value
-        }
+        _markCal();
+      } on FormatException catch (_) {
+        //_value = null; keep previous value
       }
     }
   }
@@ -126,18 +126,17 @@ class Calendar extends Base {
   /**
    * The date value of selected date.
    */
-  DateTime get value => _value;
-  void set value(DateTime value) {
+  DateTime? get value => _value;
+  void set value(DateTime? value) {
     if (_value != value) {
+
       _value = _currentValue = _setDateValue(value);
-      if (_dfmt != null) {
-        _date = value != null ? _dfmt.format(value): null;
-        _markCal();
-      }
+      _date = value != null ? _dfmt.format(value): null;
+      _markCal();
     }
   }
   
-  String _dataTargetSelector;
+  String? _dataTargetSelector;
   
   
   /** Construct a calendar object, wired to [element].
@@ -152,13 +151,14 @@ class Calendar extends Base {
    * * [newDate] - the function to create [DateTime] value when select
    * 
    */
-  Calendar(Element element, {String format, String date, String locale, int firstDayOfWeek,
-    DateTime value, String dataTargetSelector, DateTime newDate(y,m,d)}) : 
-  this._format = _data(format, element, 'format', 'yyyy/MM/dd'),
-  this._date = _data(date, element, 'date'),
-  this._locale = _data(locale, element, 'date-locale', Intl.systemLocale),
+  Calendar(Element element, {String? format, String? date, String? locale, int? firstDayOfWeek,
+    DateTime? value, String? dataTargetSelector, DateTime? newDate(y,m,d)?}) :
+  this._format = _data(format, element, 'format', 'yyyy/MM/dd')!,
+  this._locale = _data(locale, element, 'date-locale', Intl.systemLocale)!,
+  this._view = day,
   this._dataTargetSelector = _data(dataTargetSelector, element, 'target'),
-  this._firstDayOfWeek = firstDayOfWeek,
+  this._defaultFirstDayOfWeek = firstDayOfWeek,
+  this._date = _data(date, element, 'date'),
   this._value = value,
   this._currentValue = value,
   this._newDate = newDate,
@@ -173,20 +173,20 @@ class Calendar extends Base {
    * + [create] - If provided, it will be used for Calendar creation. Otherwise 
    * the default constructor with no optional parameter value is used.
    */
-  static Calendar wire(Element element, [Calendar create()]) => 
-      p.wire(element, _name, create ?? (() => new Calendar(element)));
+  static Calendar wire(Element element, [Calendar create()?]) =>
+      p.wire(element, _name, create ?? (() => Calendar(element)));
   
   void _initCalendar() {
-    _dfmt = new DateFormat(this._format, this._locale);
-    if (_firstDayOfWeek == null)
-      _firstDayOfWeek = _dfmt.dateSymbols.FIRSTDAYOFWEEK;
+    _dfmt = DateFormat(this._format, this._locale);
+    _firstDayOfWeek = _defaultFirstDayOfWeek ?? _dfmt.dateSymbols.FIRSTDAYOFWEEK;
     
     if (_date == null) {
       if (_value != null)
-        _date = _dfmt.format(_value);
+        _date = _dfmt.format(_value!);
     } else if (_value == null) {
       try {
-        _value = _currentValue = _setDateValue(_dfmt.parse(date));
+        if (_date != null)
+          _value = _currentValue = _setDateValue(_dfmt.parse(_date!));
       } on FormatException catch (_) {
         //_value = null; keep previous value
       }
@@ -211,7 +211,7 @@ class Calendar extends Base {
     $element.on('change.bs.calendar', _onCalChange);
     
     if (_dataTargetSelector != null) {
-      querySelectorAll(_dataTargetSelector).forEach(_bindCalendarValue);
+      querySelectorAll(_dataTargetSelector!).forEach(_bindCalendarValue);
     }
   }
   
@@ -219,8 +219,7 @@ class Calendar extends Base {
     if (_view != Calendar.day) return;
     
     if (_dataTargetSelector != null) {
-      
-      querySelectorAll(_dataTargetSelector).forEach((Element elem) {
+      querySelectorAll(_dataTargetSelector!).forEach((Element elem) {
         if (elem is InputElement) {
           elem.value = _date;
           _updateChange(elem);//for clear error and fire change
@@ -232,8 +231,8 @@ class Calendar extends Base {
     
     //Close dropdown
     if (e.data == null || e.data['shallClose'] != false) {
-      Element p = element.parent;
-      if (p != null && (p = p.parent) != null && p.classes.contains('open')) {
+      var p = element.parent;
+      if (p != null && (p = p.parent) != null && p!.classes.contains('open')) {
         $document().trigger('click.bs.dropdown.data-api');
       }
     }
@@ -246,9 +245,9 @@ class Calendar extends Base {
   }
   
   void _updateChange(InputElement inp) {
-    String text = inp.value;
+    final text = inp.value!;
     try {
-      DateTime val = new DateFormat(format, locale).parse(text);
+      final val = DateFormat(format, locale).parse(text);
       _clearError(inp);
       value = val;
     } on FormatException catch (_) {
@@ -259,14 +258,14 @@ class Calendar extends Base {
   }
   
   void _clearError(Element inp) {
-    Element p = inp.parent;
+    final p = inp.parent;
     if (p != null)
       p.classes.remove('has-error');
     $(inp).trigger('error.bs.datepicker');
   }
   
   void _markError(Element inp) {
-    Element p = inp.parent;
+    final p = inp.parent;
     if (p != null)
       p.classes.add('has-error');
   }
@@ -274,18 +273,17 @@ class Calendar extends Base {
   void _setView(String view) {
     
     //clear tbody
-    Element dow = element.querySelector('.dow');
-    Element cell12row = element.querySelector('.cell12row');
-    List<Element> dayrow = element.querySelectorAll('.dayrow'); 
+    var dow = element.querySelector('.dow'),
+      cell12row = element.querySelector('.cell12row'),
+      dayrow = element.querySelectorAll('.dayrow');
     if (cell12row != null)
       cell12row.remove();
     if (dow != null)
       dow.remove();
-    for (Element e in dayrow) {
+    for (final e in dayrow) {
       e.remove();
     }
-    
-    
+
     this._view = view;
     switch (view) {
     case day:
@@ -295,9 +293,9 @@ class Calendar extends Base {
       _cell12View(_dfmt.dateSymbols.SHORTMONTHS);
       break;
     case year:
-      List<String> labels = [];
-      int y = _currentValue.year;
-      int yofs = y - (y % 10 + 1);
+      final labels = <String>[];
+      var y = _currentValue!.year,
+        yofs = y - (y % 10 + 1);
 
       for (int i = 12; --i >= 0; yofs++) {
         labels.add('$yofs');
@@ -310,19 +308,18 @@ class Calendar extends Base {
   }
   
   void _dayView() {
-    TableElement calBody = element.querySelector('.cnt');
-    Element dow = calBody.tBodies[0].createFragment(_dowTemplate).children[0];
-    List<Element> children = dow.children;
-    
-    List<String> swkDays = _dfmt.dateSymbols.SHORTWEEKDAYS;
-    int ofs = (_firstDayOfWeek + 1) % 7;
+    final calBody = element.querySelector('.cnt') as TableElement,
+      dow = calBody.tBodies[0].createFragment(_dowTemplate).children[0],
+      children = dow.children,
+      swkDays = _dfmt.dateSymbols.SHORTWEEKDAYS,
+      ofs = (_firstDayOfWeek + 1) % 7;
     //render week days
-    for (int i = swkDays.length; --i >= 0;) {
+    for (var i = swkDays.length; --i >= 0;) {
       children[i].text = swkDays[(i + ofs) % 7];
     }
-    
-    var buffer = new StringBuffer();
-    for (int i = 6; --i >= 0;) {
+
+    final buffer = StringBuffer();
+    for (var i = 6; --i >= 0;) {
       buffer.write(_dayrowTemplate);
     }
     
@@ -332,9 +329,9 @@ class Calendar extends Base {
   }
   
   void _cell12View(List<String> labels) {
-    Element body = (element.querySelector('.cnt') as TableElement).tBodies.first;
-    Element cell12row = body.createFragment(_cell12rowTemplate).children[0];
-    List<Element> children = cell12row.children.first.children;
+    final body = (element.querySelector('.cnt') as TableElement).tBodies.first,
+      cell12row = body.createFragment(_cell12rowTemplate).children[0],
+      children = cell12row.children.first.children;
     
     //render month
     for (int i = labels.length; --i >= 0;) {
@@ -344,51 +341,50 @@ class Calendar extends Base {
     body.append(cell12row);
   }
   
-  void _markCal([bool silent]) {
-    Element seld = element.querySelector('.cnt .seld');
+  void _markCal() {
+    final seld = element.querySelector('.cnt .seld');
     if (seld != null)
       seld.classes.remove('seld');
-    
-    Element todayElem = element.querySelector('.cnt .today');
+
+    final todayElem = element.querySelector('.cnt .today');
     if (todayElem != null)
       todayElem.classes.remove('today');
-    
-    bool isNullValue = _value == null;
-    
-    DateTime today = _setDateValue(todayUtc());
+
+    final isNullValue = _value == null;
+
+    final today = _setDateValue(todayUtc())!;
     if (_currentValue == null)
       _currentValue = today;
-    
-    int y = _currentValue.year;
-    int m = _currentValue.month;
-    
-    Element title = element.querySelector('.title');
+
+    final y = _currentValue!.year,
+      m = _currentValue!.month,
+      title = element.querySelector('.title')!;
     
     if (_view == day) {
-      
-      DateTime beginDate = _newDateTime(y, m, 1, true);
-      int ofs = beginDate.weekday - ((_firstDayOfWeek + 1) % 7);
+
+      var beginDate = _newDateTime(y, m, 1, true),
+       ofs = beginDate.weekday - ((_firstDayOfWeek + 1) % 7);
       if (ofs < 0)
         ofs += 7;
       
       beginDate = beginDate.subtract(new Duration(days: ofs));
-      
-      bool inTodayRange = _inDayViewRange(beginDate, today);
-      bool inSelectedDayRange = _value == null ? false: _inDayViewRange(beginDate, _value);
+
+      final inTodayRange = _inDayViewRange(beginDate, today),
+        inSelectedDayRange = _value == null ? false: _inDayViewRange(beginDate, _value!);
       
       title.text = '${_dfmt.dateSymbols.SHORTMONTHS[m - 1]} $y';
-      List<Element> dayrow = element.querySelectorAll('.dayrow');
-      List<Element> outside = element.querySelectorAll('.dayrow td.outside');
-      for (Element e in outside) {
+      final dayrow = element.querySelectorAll('.dayrow'),
+        outside = element.querySelectorAll('.dayrow td.outside');
+      for (final e in outside) {
         e.classes.remove('outside');
       }
       
-      for (Element row in dayrow) {
-        for (Element td in row.children) {
+      for (final row in dayrow) {
+        for (final td in row.children) {
           td.text = '${beginDate.day}';
           renderDay(td, beginDate);
           
-          int monofs = 0;
+          var monofs = 0;
           if (beginDate.month != m) {
             td.classes.add('outside');
             
@@ -401,7 +397,8 @@ class Calendar extends Base {
           }
           $(td).data.set('monofs', monofs);
           
-          if (inSelectedDayRange && beginDate.month == _value.month && beginDate.day == _value.day){
+          if (inSelectedDayRange && beginDate.month == _value!.month
+              && beginDate.day == _value!.day){
             td.classes.add('seld');
             renderSelectedDay(td);
           }
@@ -418,11 +415,11 @@ class Calendar extends Base {
       
     } else {
       
-      bool isMon = _view == month;
-      int valY = (_value ?? _currentValue).year;
-      int index = isMon? m - 1: y % 10 + 1;
-      
-      int yofs = 0;
+      final isMon = _view == month,
+        valY = (_value ?? _currentValue)!.year;
+
+      var index = isMon? m - 1: y % 10 + 1,
+        yofs = 0;
       
       if (isMon)
         title.text = '$y';
@@ -431,12 +428,12 @@ class Calendar extends Base {
         title.text = '$yofs-${yofs + 11}';
         yofs += 11;
       }
-      
-      bool inSelectedDayRange = isNullValue ? false: _currentValue.year == valY;
+
+      var inSelectedDayRange = isNullValue ? false: _currentValue!.year == valY;
       
       if (!isNullValue) {
         if (isMon) {
-          index = _value.month - 1;
+          index = _value!.month - 1;
         } else {
           inSelectedDayRange = (yofs - 11) <= valY && valY <= yofs;
           index = valY  - yofs + 11;
@@ -444,12 +441,12 @@ class Calendar extends Base {
       }
 
       List<Element> cell12row = element.querySelectorAll('.cell12row span');
-      for (int i = cell12row.length; --i >= 0; yofs--) {
-        Element cell = cell12row[i];
+      for (var i = cell12row.length; --i >= 0; yofs--) {
+        final cell = cell12row[i];
         if (!isMon)
           cell.text = '$yofs';
 
-        DateTime date = isMon ? _newDateTime(valY, i + 1, 1, true): _newDateTime(yofs, 1, 1, true);
+        final date = isMon ? _newDateTime(valY, i + 1, 1, true): _newDateTime(yofs, 1, 1, true);
         renderDay(cell, date);
         if (inSelectedDayRange && index == i) {
           cell.classes.add('seld');
@@ -480,12 +477,12 @@ class Calendar extends Base {
     
   }
 
-  DateTime _wheelWhen;
+  DateTime? _wheelWhen;
   void _doMousewheel(WheelEvent event) {
-    final now = new DateTime.now();
+    final now = DateTime.now();
     //shift too fast for trackpad
     if (_wheelWhen == null
-        || now.difference(_wheelWhen).inMilliseconds > 200) {
+        || now.difference(_wheelWhen!).inMilliseconds > 200) {
       _wheelWhen = now;
       _shiftView(event.deltaY > 0 ? 1: -1);
     }
@@ -517,7 +514,7 @@ class Calendar extends Base {
   }
   
   void _shiftDate (String opt, int ofs) {
-    DateTime val = _currentValue != null ? _currentValue: _setDateValue(todayUtc());
+    final val = _currentValue != null ? _currentValue!: _setDateValue(todayUtc())!;
     
     int y = val.year;
     int m = val.month;
@@ -556,59 +553,58 @@ class Calendar extends Base {
   }
 
   void _clickDate(QueryEvent evt) {
-    DateTime val = _currentValue != null ? _currentValue: _setDateValue(todayUtc());
-    
-    ElementQuery target = $(evt.target);
+    final val = _currentValue ?? _setDateValue(todayUtc())!,
+      target = $(evt.target);
+
     switch (this._view) {
     case day:
-      _setTime(null, (val.month + target.data.get("monofs")),  int.parse(target.text), true);
+      _setTime(null, (val.month + target.data.get("monofs") as int), int.tryParse(target.text), true);
       _markCal();
       break;
     case month:
-      _setTime(null, $('.cell12row span').indexOf(evt.target) + 1);
+      _setTime(null, $('.cell12row span').indexOf(evt.target as Element) + 1);
       _setView(day);
       break;
     case year:
-      _setTime(int.parse(target.text));
+      _setTime(int.tryParse(target.text));
       _setView(month);
       break;
     }
     evt.stopPropagation();
   }
   
-  void _setTime(int y, [int m, int d, bool readValue = false]) {
-    DateTime val = _currentValue != null ? _currentValue: _setDateValue(todayUtc());
-    int year = y != null ? y  : val.year;
-    int month = m != null ? m : val.month;
-    int day = d != null ? d : val.day;
+  void _setTime(int? y, [int? m, int? d, bool readValue = false]) {
+    final val = _currentValue ?? _setDateValue(todayUtc())!,
+      year = y ?? val.year,
+      month = m ?? val.month,
+      day = d ?? val.day;
     
     _currentValue = _newDate0(year, month, day, d == null);
     
     if (readValue) {
-      value = _newDate != null ? _newDate(year, month, day): _currentValue;
+      value = _newDate != null ? _newDate!(year, month, day): _currentValue;
       $element.trigger('change.bs.calendar', data: {'value': value, 'view': this._view});
     }
   }
   
   DateTime _newDate0(int year, int month, int day, bool bFix) {
-      DateTime v = new DateTime(year, month, day);
-      return bFix && v.month != month && v.day != day ?
-          _setDateValue(_newDateTime(year, month + 1, 0, true))/*last day of month*/: 
-          _setDateValue(v);
-    }
+    final v = DateTime(year, month, day);
+    return _setDateValue(bFix && v.month != month && v.day != day ?
+      _newDateTime(year, month + 1, 0, true): v)!/*last day of month*/;
+  }
     
-    static DateTime _newDateTime(int year, int month, int day, bool isUtc)
-      => isUtc ? new DateTime.utc(year, month, day): new DateTime(year, month, day);
+  static DateTime _newDateTime(int year, int month, int day, bool isUtc)
+    => isUtc ? DateTime.utc(year, month, day): DateTime(year, month, day);
       
-    static DateTime todayUtc() {
-      DateTime today = new DateTime.now();
-      return new DateTime.utc(today.year, today.month, today.day);
-    }
+  static DateTime todayUtc() {
+    final today = DateTime.now();
+    return DateTime.utc(today.year, today.month, today.day);
+  }
   
-  static DateTime _setDateValue(DateTime date) {
+  static DateTime? _setDateValue(DateTime? date) {
     if (date == null) return null;
     
-    return new DateTime.utc(date.year, date.month, date.day, 12);
+    return DateTime.utc(date.year, date.month, date.day, 12);
   }
   
   /**
@@ -637,4 +633,4 @@ class Calendar extends Base {
 }
 
 _data(value, Element elem, String name, [defaultValue]) =>
-    value ?? elem.attributes["data-$name"] ?? defaultValue;
+    value ?? elem.dataset[name] ?? defaultValue;
