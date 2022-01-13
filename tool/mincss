@@ -25,7 +25,7 @@ if [ ! -f $jarfl ] ; then
 	exit 1
 fi
 
-for fn in $(find -name *.css) ; do
+for fn in $(find . -name '*.css') ; do
 	if [ "$fn" != "${fn##*/packages/}" ] || [ "$fn" != "${fn%.min.css}" ] ; then
 		#echo Skip $fn
 		continue

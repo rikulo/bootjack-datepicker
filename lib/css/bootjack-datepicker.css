@@ -119,6 +119,12 @@
   background-color: #8c765a;
 }
 
+.calendar .dayrow .wn {
+  pointer-events: none;
+  font-size: 12px;
+  color: #acacac;
+}
+
 .calendar .dow .wkend {
   color: #555;
 }
