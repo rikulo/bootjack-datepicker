@@ -31,15 +31,39 @@ class Calendar extends Base {
   <th class="wkend"></th>
 </tr>
 ''';
+  static const _dowWithWeekNumbersTemplate = '''
+<tr class="dow">
+  <th class="wn"></th>
+  <th class="wkend"></th>
+  <th class="wkday"></th>
+  <th class="wkday"></th>
+  <th class="wkday"></th>
+  <th class="wkday"></th>
+  <th class="wkday"></th>
+  <th class="wkend"></th>
+</tr>
+''';
   static const _dayrowTemplate = '''
 <tr class="dayrow">
-  <td class="wkend"></td>
-  <td class="wkday"></td>
-  <td class="wkday"></td>
-  <td class="wkday"></td>
-  <td class="wkday"></td>
-  <td class="wkday"></td>
-  <td class="wkend"></td>
+  <td class="day wkend"></td>
+  <td class="day wkday"></td>
+  <td class="day wkday"></td>
+  <td class="day wkday"></td>
+  <td class="day wkday"></td>
+  <td class="day wkday"></td>
+  <td class="day wkend"></td>
+</tr>
+''';
+  static const _dayrowWithWeekNumbersTemplate = '''
+<tr class="dayrow">
+  <td class="wn"></td>
+  <td class="day wkend"></td>
+  <td class="day wkday"></td>
+  <td class="day wkday"></td>
+  <td class="day wkday"></td>
+  <td class="day wkday"></td>
+  <td class="day wkday"></td>
+  <td class="day wkend"></td>
 </tr>
 ''';
   static const _cell12rowTemplate = '''
@@ -135,6 +159,8 @@ class Calendar extends Base {
       _markCal();
     }
   }
+
+  bool displayWeekNumbers = false;
   
   String? _dataTargetSelector;
   
@@ -149,10 +175,12 @@ class Calendar extends Base {
    * * [value] - the selected [DateTime] value
    * * [dataTargetSelector] - the selector for [InputElement] to display date value
    * * [newDate] - the function to create [DateTime] value when select
+   * * [displayWeekNumbers] - whether to show week numbers, default: false
    * 
    */
   Calendar(Element element, {String? format, String? date, String? locale, int? firstDayOfWeek,
-    DateTime? value, String? dataTargetSelector, DateTime? newDate(y,m,d)?}) :
+    DateTime? value, String? dataTargetSelector, DateTime? newDate(y,m,d)?,
+    bool? displayWeekNumbers}) :
   this._format = _data(format, element, 'format', 'yyyy/MM/dd')!,
   this._locale = _data(locale, element, 'date-locale', Intl.systemLocale)!,
   this._view = day,
@@ -162,6 +190,7 @@ class Calendar extends Base {
   this._value = value,
   this._currentValue = value,
   this._newDate = newDate,
+  this.displayWeekNumbers = displayWeekNumbers ?? element.dataset['weeknumbers'] == 'true',
   super(element, _name) {
     _initCalendar();
     _initDatepicker();
@@ -201,7 +230,7 @@ class Calendar extends Base {
     ..on('click', _clickArrow, selector: '.left-icon')
     ..on('click', _clickArrow, selector: '.right-icon')
     
-    ..on('click', _clickDate, selector: '.dayrow td, .cell12row span');
+    ..on('click', _clickDate, selector: '.dayrow .day, .cell12row span');
     
     _setView(day);
   }
@@ -284,6 +313,10 @@ class Calendar extends Base {
       e.remove();
     }
 
+    //reset colspan
+    final header = element.querySelector('.header > th') as TableCellElement?;
+    header?.colSpan = 7;
+
     this._view = view;
     switch (view) {
     case day:
@@ -309,18 +342,25 @@ class Calendar extends Base {
   
   void _dayView() {
     final calBody = element.querySelector('.cnt') as TableElement,
-      dow = calBody.tBodies[0].createFragment(_dowTemplate).children[0],
+      dowTemplate = displayWeekNumbers ? _dowWithWeekNumbersTemplate : _dowTemplate,
+      dayrowTemplate = displayWeekNumbers ? _dayrowWithWeekNumbersTemplate : _dayrowTemplate,
+      startPos = displayWeekNumbers ? 1 : 0,
+      dow = calBody.tBodies[0].createFragment(dowTemplate).children[0],
       children = dow.children,
       swkDays = _dfmt.dateSymbols.SHORTWEEKDAYS,
       ofs = (_firstDayOfWeek + 1) % 7;
+
+    final header = element.querySelector('.header > th') as TableCellElement;
+    header.colSpan = displayWeekNumbers ? 8 : 7;
+
     //render week days
     for (var i = swkDays.length; --i >= 0;) {
-      children[i].text = swkDays[(i + ofs) % 7];
+      children[startPos + i].text = swkDays[(i + ofs) % 7];
     }
 
     final buffer = StringBuffer();
     for (var i = 6; --i >= 0;) {
-      buffer.write(_dayrowTemplate);
+      buffer.write(dayrowTemplate);
     }
     
     calBody.tBodies[0]
@@ -380,7 +420,15 @@ class Calendar extends Base {
       }
       
       for (final row in dayrow) {
-        for (final td in row.children) {
+        final len = row.children.length;
+        for (var i = 0; i < len; i++) {
+          final td = row.children[i];
+          if (i == 0 && displayWeekNumbers) { // Week numbers
+            td.text = getWeekOfYear(beginDate, _firstDayOfWeek).toString();
+            renderWeekNumber(td);
+            continue;
+          }
+
           td.text = '${beginDate.day}';
           renderDay(td, beginDate);
           
@@ -475,6 +523,10 @@ class Calendar extends Base {
   
   void renderToDay(Element elem) {
     
+  }
+
+  void renderWeekNumber(Element elem) {
+
   }
 
   DateTime? _wheelWhen;
@@ -634,3 +686,21 @@ class Calendar extends Base {
 
 _data(value, Element elem, String name, [defaultValue]) =>
     value ?? elem.dataset[name] ?? defaultValue;
+
+/// Returns a 0-based [weekday] index, according to [firstDayOfWeek].
+/// * [weekday] should be [DateTime.weekday] (1-based)
+/// * [firstDayOfWeek] is 0-based (0 is Monday, 6 is Sunday)
+int weekDayReIndex(int weekday, int firstDayOfWeek)
+=> (((weekday - DateTime.monday) - firstDayOfWeek) + 7) % 7;
+
+/// Get the week number of year of [date].
+/// ref: https://stackoverflow.com/a/6117889
+/// * [firstDayOfWeek] is 0-based (0 is Monday, 6 is Sunday), default is Monday (ISO 8601)
+int getWeekOfYear(DateTime date, [int firstDayOfWeek = 0]) {
+  final midnight = DateTime.utc(date.year, date.month, date.day),
+    daysDiff = weekDayReIndex(DateTime.thursday, firstDayOfWeek) - weekDayReIndex(date.weekday, firstDayOfWeek),
+    thursday = midnight.add(Duration(days: daysDiff)),
+    yearStart = DateTime.utc(thursday.year, DateTime.january , 1),
+    millisDiff = thursday.millisecondsSinceEpoch - yearStart.millisecondsSinceEpoch;
+  return (((millisDiff / 86400000) + 1) / 7).ceil();
+}
