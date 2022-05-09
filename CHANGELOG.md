@@ -2,6 +2,7 @@
 
 **2.0.1**
 * Supported display week numbers
+* Datepicker supports the date granularity users can select
 
 **2.0.0**
 * Migrate to null safety

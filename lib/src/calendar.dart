@@ -96,7 +96,9 @@ class Calendar extends Base {
   late int _firstDayOfWeek;
   int? _defaultFirstDayOfWeek;
   
-  String _view;
+  String _view = day;
+
+  String dateGranularity = day;
 
   late DateFormat _dfmt;
   
@@ -176,14 +178,15 @@ class Calendar extends Base {
    * * [dataTargetSelector] - the selector for [InputElement] to display date value
    * * [newDate] - the function to create [DateTime] value when select
    * * [displayWeekNumbers] - whether to show week numbers, default: false
-   * 
+   * * [dateGranularity] - the date granularity user can choose to ('day', 'month', 'year'), default: 'day'
+   *
    */
   Calendar(Element element, {String? format, String? date, String? locale, int? firstDayOfWeek,
     DateTime? value, String? dataTargetSelector, DateTime? newDate(y,m,d)?,
-    bool? displayWeekNumbers}) :
+    bool? displayWeekNumbers, String? dateGranularity}) :
   this._format = _data(format, element, 'format', 'yyyy/MM/dd')!,
   this._locale = _data(locale, element, 'date-locale', Intl.systemLocale)!,
-  this._view = day,
+  this.dateGranularity = _data(dateGranularity, element, 'date-granularity', day)!,
   this._dataTargetSelector = _data(dataTargetSelector, element, 'target'),
   this._defaultFirstDayOfWeek = firstDayOfWeek,
   this._date = _data(date, element, 'date'),
@@ -192,6 +195,7 @@ class Calendar extends Base {
   this._newDate = newDate,
   this.displayWeekNumbers = displayWeekNumbers ?? element.dataset['weeknumbers'] == 'true',
   super(element, _name) {
+    _view = this.dateGranularity;
     _initCalendar();
     _initDatepicker();
   }
@@ -232,7 +236,7 @@ class Calendar extends Base {
     
     ..on('click', _clickDate, selector: '.dayrow .day, .cell12row span');
     
-    _setView(day);
+    _setView(dateGranularity);
   }
   
   void _initDatepicker() {
@@ -245,7 +249,7 @@ class Calendar extends Base {
   }
   
   void _onCalChange(QueryEvent e) {//cal value to elements 
-    if (_view != Calendar.day) return;
+    if (_view != dateGranularity) return;
     
     if (_dataTargetSelector != null) {
       querySelectorAll(_dataTargetSelector!).forEach((Element elem) {
@@ -614,12 +618,20 @@ class Calendar extends Base {
       _markCal();
       break;
     case month:
-      _setTime(null, $('.cell12row span').indexOf(evt.target as Element) + 1);
-      _setView(day);
+      final shallStop = dateGranularity == month;
+      _setTime(null, $('.cell12row span').indexOf(evt.target as Element) + 1, null, shallStop);
+      if (shallStop)
+        _markCal();
+      else
+        _setView(day);
       break;
     case year:
-      _setTime(int.tryParse(target.text));
-      _setView(month);
+      final shallStop = dateGranularity == year;
+      _setTime(int.tryParse(target.text), null, null, shallStop);
+      if (shallStop)
+        _markCal();
+      else
+        _setView(month);
       break;
     }
     evt.stopPropagation();
@@ -664,7 +676,7 @@ class Calendar extends Base {
    */
   void reset() {
     _currentValue = _value;
-    _setView(day);
+    _setView(dateGranularity);
   }
   
   // Data API //
