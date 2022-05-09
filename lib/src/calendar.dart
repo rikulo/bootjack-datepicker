@@ -424,7 +424,7 @@ class Calendar extends Base {
         for (var i = 0; i < len; i++) {
           final td = row.children[i];
           if (i == 0 && displayWeekNumbers) { // Week numbers
-            td.text = getWeekOfYear(beginDate, _firstDayOfWeek).toString();
+            td.text = _getWeekOfYear(beginDate, _firstDayOfWeek).toString();
             renderWeekNumber(td);
             continue;
           }
@@ -690,15 +690,15 @@ _data(value, Element elem, String name, [defaultValue]) =>
 /// Returns a 0-based [weekday] index, according to [firstDayOfWeek].
 /// * [weekday] should be [DateTime.weekday] (1-based)
 /// * [firstDayOfWeek] is 0-based (0 is Monday, 6 is Sunday)
-int weekDayReIndex(int weekday, int firstDayOfWeek)
+int _weekDayReIndex(int weekday, int firstDayOfWeek)
 => (((weekday - DateTime.monday) - firstDayOfWeek) + 7) % 7;
 
 /// Get the week number of year of [date].
 /// ref: https://stackoverflow.com/a/6117889
 /// * [firstDayOfWeek] is 0-based (0 is Monday, 6 is Sunday), default is Monday (ISO 8601)
-int getWeekOfYear(DateTime date, [int firstDayOfWeek = 0]) {
+int _getWeekOfYear(DateTime date, [int firstDayOfWeek = 0]) {
   final midnight = DateTime.utc(date.year, date.month, date.day),
-    daysDiff = weekDayReIndex(DateTime.thursday, firstDayOfWeek) - weekDayReIndex(date.weekday, firstDayOfWeek),
+    daysDiff = _weekDayReIndex(DateTime.thursday, firstDayOfWeek) - _weekDayReIndex(date.weekday, firstDayOfWeek),
     thursday = midnight.add(Duration(days: daysDiff)),
     yearStart = DateTime.utc(thursday.year, DateTime.january , 1),
     millisDiff = thursday.millisecondsSinceEpoch - yearStart.millisecondsSinceEpoch;
