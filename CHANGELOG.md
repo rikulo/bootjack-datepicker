@@ -1,5 +1,8 @@
 #CHANGES
 
+**2.0.2**
+* Fixed wrong date in renderDay when render month view
+
 **2.0.1**
 * Supported display week numbers
 * Datepicker supports the date granularity users can select
