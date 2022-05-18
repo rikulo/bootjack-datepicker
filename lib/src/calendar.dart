@@ -504,8 +504,8 @@ class Calendar extends Base {
           cell.text = '$yofs';
 
         date = isMon ? _newDateTime(y, i + 1, 1, true): _newDateTime(yofs, 1, 1, true);
-        if (begin == null)
-            begin = date;
+        if (end == null)
+            end = date;
         renderDay(cell, date);
         if (inSelectedDayRange && index == i) {
           cell.classes.add('seld');
@@ -513,7 +513,7 @@ class Calendar extends Base {
         }
       }
 
-      end = date;
+      begin = date;
     }
     
     $element.trigger('changView.bs.calendar', data: {'value': _currentValue, 
