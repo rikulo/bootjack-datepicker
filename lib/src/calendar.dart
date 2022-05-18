@@ -394,15 +394,17 @@ class Calendar extends Base {
     if (todayElem != null)
       todayElem.classes.remove('today');
 
-    final isNullValue = _value == null;
+    final isNullValue = _value == null,
+      today = _setDateValue(todayUtc())!;
 
-    final today = _setDateValue(todayUtc())!;
     if (_currentValue == null)
       _currentValue = today;
 
     final y = _currentValue!.year,
       m = _currentValue!.month,
       title = element.querySelector('.title')!;
+
+    DateTime? begin, end;
     
     if (_view == day) {
 
@@ -434,6 +436,8 @@ class Calendar extends Base {
           }
 
           td.text = '${beginDate.day}';
+          if (begin == null)
+            begin = beginDate;
           renderDay(td, beginDate);
           
           var monofs = 0;
@@ -464,7 +468,7 @@ class Calendar extends Base {
         }
       }
 
-      
+      end = beginDate;
     } else {
       
       final isMon = _view == month,
@@ -493,21 +497,27 @@ class Calendar extends Base {
       }
 
       List<Element> cell12row = element.querySelectorAll('.cell12row span');
+      DateTime? date;
       for (var i = cell12row.length; --i >= 0; yofs--) {
         final cell = cell12row[i];
         if (!isMon)
           cell.text = '$yofs';
 
-        final date = isMon ? _newDateTime(y, i + 1, 1, true): _newDateTime(yofs, 1, 1, true);
+        date = isMon ? _newDateTime(y, i + 1, 1, true): _newDateTime(yofs, 1, 1, true);
+        if (begin == null)
+            begin = date;
         renderDay(cell, date);
         if (inSelectedDayRange && index == i) {
           cell.classes.add('seld');
           renderSelectedDay(cell12row[i]);
         }
       }
+
+      end = date;
     }
     
-    $element.trigger('changView.bs.calendar', data: {'value': _currentValue, 'view': _view});
+    $element.trigger('changView.bs.calendar', data: {'value': _currentValue, 
+      'view': _view, 'begin': begin, 'end': end});
   }
   
   bool _inDayViewRange(DateTime beginDate, DateTime date) {

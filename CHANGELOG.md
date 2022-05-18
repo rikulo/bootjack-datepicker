@@ -2,6 +2,7 @@
 
 **2.0.2**
 * Fixed wrong date in renderDay when render month view
+* Added begin, end date in changView.bs.calendar event
 
 **2.0.1**
 * Supported display week numbers
