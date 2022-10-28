@@ -47,6 +47,12 @@ abstract class TimePicker {
   String get locale;
   void set locale(String locale);
 
+  /// Get value of hour field.
+  String get hour;
+
+  /// Get value of minute field.
+  String get minute;
+
   void highlightHour();
   void highlightMinute();
   void highlightAmPm();
@@ -156,14 +162,10 @@ class _TimePickerImpl extends Base implements TimePicker {
         1 + max(_ampms[0].length, _ampms[1].length));//e.g. 00:00 AM
   }
 
-  /**
-   * Get value of hour field.
-   */
+  @override
   String get hour => _hour == null ? _emptyVal : '${_hour! < 10 ? '0' : ''}$_hour';
 
-  /**
-   * Get value of minute field.
-   */
+  @override
   String get minute => _minute == null ? _emptyVal : '${_minute! < 10 ? '0' : ''}$_minute';
 
   int get _hourEndIndex {

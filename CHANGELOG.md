@@ -1,4 +1,6 @@
 #CHANGES
+**2.0.3**
+* Added getter for hour and minute
 
 **2.0.2**
 * Fixed wrong date in renderDay when render month view
