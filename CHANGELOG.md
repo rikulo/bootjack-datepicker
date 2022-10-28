@@ -2,6 +2,7 @@
 **2.0.3**
 * Added getter for hour and minute
 * Added getter for hour and minute values
+* Fixed wrong hour string when press down key
 
 **2.0.2**
 * Fixed wrong date in renderDay when render month view

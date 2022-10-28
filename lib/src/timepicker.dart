@@ -283,7 +283,7 @@ class _TimePickerImpl extends Base implements TimePicker {
     if (maxHour != null && (newHour > maxHour - 1 || newHour < 0)) {
       _hour = newHour < 0 ? maxHour - 1: 0;
     } else
-      _hour = newHour;
+      _hour = max(newHour, 0);
 
     _syncAmPm();
   }
