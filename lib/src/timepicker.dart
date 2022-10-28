@@ -12,7 +12,7 @@ abstract class TimePicker {
    */
   factory TimePicker(Element element, {
       String? time, DateTime? date, int? step, bool? enable24HourTime})
-    => new _TimePickerImpl(element, time: time, date: date,
+    => _TimePickerImpl(element, time: time, date: date,
         step: step, enable24HourTime: enable24HourTime);
 
   /** Get time with format: '00:00'.
@@ -87,12 +87,14 @@ enum _HighlightUnit {hour, minute, ampm}
 class _TimePickerImpl extends Base implements TimePicker {
 
   static const _defaultStep = 5;
-  static const _maxHour = 24;
   static const _maxMinute = 60;
 
+  int? _maxHour;
+
   _TimePickerImpl(Element element, {String? time,
-    DateTime? date, int? step, bool? enable24HourTime}):
+    DateTime? date, int? step, bool? enable24HourTime, int? maxHour = 24}):
   super(element, TimePicker._name) {
+    
     $element
     ..on('keydown', _onKeydown)
     ..on('input', _onInput)
@@ -101,7 +103,11 @@ class _TimePickerImpl extends Base implements TimePicker {
 
     element.onMouseWheel.listen(_doMousewheel);
 
-    this.enable24HourTime = enable24HourTime ?? element.dataset['date-24'] == 'true';
+    final msxStr = element.dataset['max-hour'];
+    _maxHour = msxStr == null ? maxHour: int.tryParse(msxStr);
+
+    this.enable24HourTime = _maxHour == null 
+      || (enable24HourTime ?? element.dataset['date-24'] == 'true');
     this._locale0 = _data(null, element, 'date-locale', Intl.systemLocale);
 
     //input.value count on
@@ -128,7 +134,7 @@ class _TimePickerImpl extends Base implements TimePicker {
   void set step(int? s) => _step = s ?? _defaultStep;
 
   @override
-  void set enable24HourTime(bool enable) => _in24Hour = enable == true;
+  void set enable24HourTime(bool enable) => _in24Hour = enable;
 
   @override
   String get locale => _locale;
@@ -143,8 +149,11 @@ class _TimePickerImpl extends Base implements TimePicker {
   void set _locale0(String locale) {
     _locale = locale;
     _ampms = DateFormat.Hm(_locale).dateSymbols.AMPMS;
-    input.maxLength = 5 + (_in24Hour ? 0:
-      1 + max(_ampms[0].length, _ampms[1].length));//e.g. 00:00 AM
+    if (_maxHour == null)
+      input.removeAttribute('maxlength');
+    else
+      input.maxLength = 5 + (_in24Hour ? 0:
+        1 + max(_ampms[0].length, _ampms[1].length));//e.g. 00:00 AM
   }
 
   /**
@@ -156,6 +165,16 @@ class _TimePickerImpl extends Base implements TimePicker {
    * Get value of minute field.
    */
   String get minute => _minute == null ? _emptyVal : '${_minute! < 10 ? '0' : ''}$_minute';
+
+  int get _hourEndIndex {
+    if (_maxHour == null) {
+      final val = input.value!;
+      return max(2, val.replaceAll(_reNumFormat, '')
+        .split(':')[0].length);
+    }
+
+    return 2;
+  }
 
   void _highlightUnit(QueryEvent event) {
     if (event.type == 'focus')//make click event high priority
@@ -207,7 +226,7 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   void _highlightHour() {
-    input.setSelectionRange(0, 2);
+      input.setSelectionRange(0, _hourEndIndex);
   }
 
   @override
@@ -217,7 +236,8 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   void _highlightMinute() {
-    input.setSelectionRange(3, 5);
+    final index = _hourEndIndex;
+    input.setSelectionRange(index + 1, index + 3);
   }
 
   @override
@@ -240,7 +260,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 
     if (_minute == null) _minute = 0;
     var hour = _hour ?? DateTime.now().hour;
-    _hour = hour +=  hour < 12 ? 12: -12;
+    _hour = hour += hour < 12 ? 12: -12;
     _syncAmPm();
   }
 
@@ -253,10 +273,11 @@ class _TimePickerImpl extends Base implements TimePicker {
   void incrementHour(bool add) {
     if (_minute == null) _minute = 0;
     _hour = _hour ?? DateTime.now().hour;
-    final newHour = _hour! + (add ? 1 : -1);
+    final newHour = _hour! + (add ? 1 : -1),
+      maxHour = _maxHour;
 
-    if (newHour > _maxHour - 1 || newHour < 0) {
-      _hour = newHour < 0 ? _maxHour - 1: 0;
+    if (maxHour != null && (newHour > maxHour - 1 || newHour < 0)) {
+      _hour = newHour < 0 ? maxHour - 1: 0;
     } else
       _hour = newHour;
 
@@ -292,8 +313,9 @@ class _TimePickerImpl extends Base implements TimePicker {
       return;
     }
 
-    final parsedTime = parseTime(t, null);
-    _hour = parsedTime[0] == null ? null : parsedTime[0]! >= _maxHour ? 0 : parsedTime[0];
+    final parsedTime = parseTime(t, null),
+      maxHour = _maxHour;
+    _hour = parsedTime[0] == null ? null : (maxHour != null && parsedTime[0]! >= maxHour) ? 0 : parsedTime[0];
     _minute = parsedTime[1] == null ? null : parsedTime[1]! >= _maxMinute ? 0 : parsedTime[1];
     _syncAmPm();
 
@@ -357,7 +379,7 @@ class _TimePickerImpl extends Base implements TimePicker {
     return [h, m];
   }
 
-  static final RegExp _reNumFormat = new RegExp('[^0-9\:]');
+  static final _reNumFormat = RegExp('[^0-9\:]');
 
   void _updateInput() {
     input.value = time;
@@ -386,7 +408,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   DateTime? _wheelWhen;
   void _doMousewheel(WheelEvent event) {
-    final now = new DateTime.now();
+    final now = DateTime.now();
     //shift too fast for trackpad
     if (_wheelWhen == null
         || now.difference(_wheelWhen!).inMilliseconds > 200) {
@@ -399,24 +421,24 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   void _onKeydown(QueryEvent e) {
     final key = e.keyCode,
-          inAmPm = _highlightedUnit == _HighlightUnit.ampm,
-          isNum = (key >= KeyCode.ZERO && key <= KeyCode.NINE) ||
-                  key >= KeyCode.NUM_ZERO && key <= KeyCode.NUM_NINE;
+      inAmPm = _highlightedUnit == _HighlightUnit.ampm,
+      isNum = (key >= KeyCode.ZERO && key <= KeyCode.NINE) ||
+              key >= KeyCode.NUM_ZERO && key <= KeyCode.NUM_NINE;
     //prevent typing any character except numbers
     if (!isNum) {
       switch (key) {
         case KeyCode.BACKSPACE:
         case KeyCode.DELETE:
-          int cursorPos = getCursorPosition();
+          final cursorPos = getCursorPosition();
           //set time to null when hour or minute is cleared
           if (!rangeSelected()) {
-            if (cursorPos == 3 || cursorPos == 0) {
+            if (cursorPos == (_hourEndIndex + 1) || cursorPos == 0) {
               _hour = null;
               _minute = null;
               e.preventDefault();
               highlightHour();
               _updateInput();
-            } else if (cursorPos == 6) {
+            } else if (cursorPos == (_hourEndIndex + 4)) {
               e.preventDefault();
               _ampmIndex = 0;
               _updateInput();
@@ -484,8 +506,8 @@ class _TimePickerImpl extends Base implements TimePicker {
               _hour = val;
               _minute = newMinute;
             },
-            shallHighlight: newHour > shallAppend0
-              || parsedText[0].length > 1);
+            shallHighlight: _maxHour != null && (newHour > shallAppend0
+              || parsedText[0].length > 1));
         }
         break;
       case _HighlightUnit.minute:
@@ -498,7 +520,7 @@ class _TimePickerImpl extends Base implements TimePicker {
         break;
       case _HighlightUnit.ampm:
         if (!_in24Hour) {
-          if (val.length > 6) {
+          if (val.length > (_hourEndIndex + 4)) {
             if (_hour == null) incrementHour(true);
             final newAmPm = val.substring(6).toLowerCase();
 
@@ -530,10 +552,10 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
 
-  void _updateTime(int value, int max, {
+  void _updateTime(int value, int? max, {
       required bool shallHighlight,
       required void save(int value)}) {
-    value = value >= max ? max - 1: value;
+    value = (max != null && value >= max) ? max - 1: value;
     save(value);
     if (shallHighlight) {
       _updateInput();

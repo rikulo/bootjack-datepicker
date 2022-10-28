@@ -413,7 +413,7 @@ class Calendar extends Base {
       if (ofs < 0)
         ofs += 7;
       
-      beginDate = beginDate.subtract(new Duration(days: ofs));
+      beginDate = beginDate.subtract(Duration(days: ofs));
 
       final inTodayRange = _inDayViewRange(beginDate, today),
         inSelectedDayRange = _value == null ? false: _inDayViewRange(beginDate, _value!);
