@@ -53,6 +53,8 @@ abstract class TimePicker {
   /// Get value of minute field.
   String get minute;
 
+  List<int?> get timeValues;
+
   void highlightHour();
   void highlightMinute();
   void highlightAmPm();
@@ -353,6 +355,12 @@ class _TimePickerImpl extends Base implements TimePicker {
 
     _updateInput();
   }
+
+  @override
+  List<int?> get timeValues {
+    return parseTime(input.value, null);
+  }
+
 
   List<int?> parseTime(String? time, [int? defaultValue = 0]) {
     if (time == null || time.isEmpty)
