@@ -4,6 +4,7 @@
 * Added getter for hour and minute values
 * Fixed wrong hour string when press down key
 * Support second
+* Set default hour to 0 when no max hour
 
 **2.0.2**
 * Fixed wrong date in renderDay when render month view

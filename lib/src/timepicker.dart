@@ -122,8 +122,8 @@ class _TimePickerImpl extends Base implements TimePicker {
 
     element.onMouseWheel.listen(_doMousewheel);
 
-    final msxStr = element.dataset['max-hour'];
-    _maxHour = msxStr == null ? maxHour: int.tryParse(msxStr);
+    final maxStr = element.dataset['max-hour'];
+    _maxHour = maxStr != null ? int.tryParse(maxStr): maxHour;
 
     this.enable24HourTime = _maxHour == null 
       || (enable24HourTime ?? element.dataset['date-24'] == 'true');
@@ -320,7 +320,7 @@ class _TimePickerImpl extends Base implements TimePicker {
   void incrementHour(bool add) {
     if (_second == null) _second = 0;
     if (_minute == null) _minute = 0;
-    _hour = _hour ?? DateTime.now().hour;
+    _hour = _hour ?? (_maxHour == null ? 0: DateTime.now().hour);
     final newHour = _hour! + (add ? 1 : -1),
       maxHour = _maxHour;
 
