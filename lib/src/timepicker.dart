@@ -335,7 +335,7 @@ class _TimePickerImpl extends Base implements TimePicker {
   @override
   void incrementMinute(bool add) {
     if (_second == null) _second = 0;
-    if (_hour == null) incrementHour(true);
+    if (_hour == null) _hour = 0;
     _minute = _minute ?? 0;
     final newMin = _minute! + (add ? 1 : -1) * step;
 
@@ -348,7 +348,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   @override
   void incrementSecond(bool add) {
-    if (_hour == null) incrementHour(true);
+    if (_hour == null)  _hour = 0;
     if (_minute == null) _minute = 0;
 
     _second = _second ?? 0;

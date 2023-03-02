@@ -1,4 +1,6 @@
 #CHANGES
+**2.0.4**
+* Fixed default hour is 0 when adjust times
 **2.0.3**
 * Added getter for hour and minute
 * Added getter for hour and minute values
