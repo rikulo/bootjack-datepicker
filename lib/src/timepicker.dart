@@ -536,6 +536,7 @@ class _TimePickerImpl extends Base implements TimePicker {
           break;
         case KeyCode.UP:
         case KeyCode.DOWN:
+          e.preventDefault();
           _nextTimeStep(key == KeyCode.UP);
           break;
         case KeyCode.LEFT:
@@ -553,6 +554,9 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   void _nextTimeStep(bool add) {
+    final curStart = input.selectionStart ?? 0,
+      curEnd = input.selectionEnd ?? 0;
+
     switch(_highlightedUnit) {
       case _HighlightUnit.hour:
         incrementHour(add);
@@ -574,6 +578,7 @@ class _TimePickerImpl extends Base implements TimePicker {
         break;
     }
     _updateInput();
+    input.setSelectionRange(curStart, curEnd);
   }
 
   void _onInput(QueryEvent event) {
