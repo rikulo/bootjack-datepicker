@@ -1,7 +1,11 @@
-#CHANGES
+# CHANGES
+**2.0.5**
+* Added `default-empty` switch for TimePicker
+
 **2.0.4**
 * Fixed default hour is 0 when adjust times
 * Stop move cursor when change value by press up/down key
+
 **2.0.3**
 * Added getter for hour and minute
 * Added getter for hour and minute values
@@ -38,15 +42,15 @@
 **1.0.0**
 * Dart 2 required
 
-**0.5.9*
+**0.5.9**
 * Fixed pass a wrong date when render year view
 
-**0.5.8*
+**0.5.8**
 * Timepicker support null value
 * Set time to null when keep pressing backspace
 * Fixed pick year error when value is null
 
-**0.5.7*
+**0.5.7**
 * Fixed render first day of week with Sat
 * Support timepicker
 

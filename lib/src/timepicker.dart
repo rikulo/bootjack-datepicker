@@ -12,11 +12,13 @@ abstract class TimePicker {
    */
   factory TimePicker(Element element, {
       String? time, DateTime? date, int? step, int? maxHour = 24,
-      bool? enable24HourTime, bool? enableSecond})
+      bool? enable24HourTime, bool? enableSecond, bool? enableDefaultEmpty})
     => _TimePickerImpl(element, time: time, date: date,
         step: step, maxHour: maxHour,
         enableSecond: enableSecond,
-        enable24HourTime: enable24HourTime);
+        enable24HourTime: enable24HourTime,
+        enableDefaultEmpty: enableDefaultEmpty,
+    );
 
   /** Get time with format: '00:00'.
    */
@@ -45,6 +47,9 @@ abstract class TimePicker {
   void set enable24HourTime(bool enable);
 
   void set enableSecond(bool enable);
+
+  /// Whether to enable default empty `--:--` (default: true).
+  void set enableDefaultEmpty(bool enable);
 
   /**
    * The date format locale of the calendar value.
@@ -111,7 +116,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   _TimePickerImpl(Element element, {String? time,
     DateTime? date, int? step, bool? enable24HourTime, 
-    bool? enableSecond, int? maxHour = 24}):
+    bool? enableSecond, int? maxHour = 24, bool? enableDefaultEmpty}):
   super(element, TimePicker._name) {
     
     $element
@@ -128,6 +133,7 @@ class _TimePickerImpl extends Base implements TimePicker {
     this.enable24HourTime = _maxHour == null 
       || (enable24HourTime ?? element.dataset['date-24'] == 'true');
     this.enableSecond = enableSecond ?? element.dataset['second'] == 'true';
+    this.enableDefaultEmpty = enableDefaultEmpty ?? element.dataset['default-empty'] != 'false';
     this._locale0 = _data(null, element, 'date-locale', Intl.systemLocale);
 
     //input.value count on
@@ -143,7 +149,7 @@ class _TimePickerImpl extends Base implements TimePicker {
   int _ampmIndex = 0;
   _HighlightUnit? _highlightedUnit;
 
-  bool _in24Hour = false, _enableSecond = false;
+  bool _in24Hour = false, _enableSecond = false, _enableDefaultEmpty = true;
   late String _locale;
   late List<String> _ampms;
 
@@ -158,6 +164,9 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   @override
   void set enableSecond(bool enable) => _enableSecond = enable;
+  
+  @override
+  void set enableDefaultEmpty(bool enable) => _enableDefaultEmpty = enable;
 
   @override
   String get locale => _locale;
@@ -367,6 +376,11 @@ class _TimePickerImpl extends Base implements TimePicker {
   @override
   String get time {
     _syncAmPm();
+    if (!_enableDefaultEmpty
+        && _hour == null && _minute == null
+        && (!_enableSecond || _second == null)) {
+      return '';
+    }
     final hour0 = _hour,
       second0 = _enableSecond ? ':$second': '';
     return _in24Hour ? '$hour:$minute$second0':
