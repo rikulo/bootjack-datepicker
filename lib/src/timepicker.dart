@@ -600,7 +600,7 @@ class _TimePickerImpl extends Base implements TimePicker {
     final val = input.value!,
       parsedTime = parseTime(val, 0),
       parsedText = val.replaceAll(_reNumFormat, '').split(':'),
-      newHour = parsedTime[0], newMinute = parsedTime[1], newSecond = parsedTime[2];
+      newHour = parsedTime[0], newMinute = parsedTime[1], newSecond = at(parsedTime, 2) ?? 0;
 
     switch(_highlightedUnit) {
       case _HighlightUnit.hour:
