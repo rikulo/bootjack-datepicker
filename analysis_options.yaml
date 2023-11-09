@@ -1,6 +1,7 @@
 analyzer:
   errors:
     todo: ignore
+    missing_return: ignore
 linter:
   rules:
     - annotate_overrides

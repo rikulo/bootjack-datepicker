@@ -632,7 +632,7 @@ class _TimePickerImpl extends Base implements TimePicker {
         if (_hour == null) incrementHour(true);
         if (_minute == null) _minute = 0;
 
-        _updateTime(newSecond!, _maxMinute,
+        _updateTime(newSecond, _maxMinute,
             save: (final val) => _second = val,
             shallHighlight: newSecond > 5
               || parsedText[2].length > 1);

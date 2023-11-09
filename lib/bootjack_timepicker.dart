@@ -18,4 +18,5 @@ part 'src/timepicker.dart';
 T? at<T>(List<T?>? list, int index) {
   if (list != null && list.length > index && index >= 0)
     return list[index];
+  return null;
 }
