@@ -144,7 +144,7 @@ class _TimePickerImpl extends Base implements TimePicker {
     this.step = step;
   }
 
-  InputElement get input => element as InputElement;
+  Element get input => element;
   int? _hour, _minute, _second, _step;
   int _ampmIndex = 0;
   _HighlightUnit? _highlightedUnit;
@@ -184,8 +184,8 @@ class _TimePickerImpl extends Base implements TimePicker {
     if (_maxHour == null)
       input.removeAttribute('maxlength');
     else
-      input.maxLength = 5 + (_in24Hour ? 0:
-        1 + max(_ampms[0].length, _ampms[1].length));//e.g. 00:00 AM
+      setInputMaxLength(input, 5 + (_in24Hour ? 0:
+        1 + max(_ampms[0].length, _ampms[1].length)));//e.g. 00:00 AM
   }
 
   @override
@@ -199,7 +199,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   int get _hourEndIndex {
     if (_maxHour == null) {
-      final val = input.value!;
+      final val = getInputValue(input) ?? '';
       return max(2, val.replaceAll(_reNumFormat, '')
         .split(':')[0].length);
     }
@@ -271,7 +271,7 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   void _highlightHour() {
-      input.setSelectionRange(0, _hourEndIndex);
+      setSelectionRange(input, 0, _hourEndIndex);
   }
 
   @override
@@ -282,7 +282,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   void _highlightMinute() {
     final index = _hourEndIndex;
-    input.setSelectionRange(index + 1, index + 3);
+    setSelectionRange(input, index + 1, index + 3);
   }
 
   @override
@@ -293,7 +293,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   void _highlightSecond() {
     final index = _hourEndIndex + 3;
-    input.setSelectionRange(index + 1, index + 3);
+    setSelectionRange(input, index + 1, index + 3);
   }
 
   @override
@@ -306,7 +306,8 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   void _highlightAmPm() {
-    input.setSelectionRange(_enableSecond ? 9: 6, input.maxLength!);
+    setSelectionRange(input, _enableSecond ? 9: 6, 
+      getInputMaxLength(input)!);
   }
 
   @override
@@ -438,7 +439,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   @override
   List<int?> get timeValues {
-    return parseTime(input.value, null);
+    return parseTime(getInputValue(input), null);
   }
 
 
@@ -479,7 +480,7 @@ class _TimePickerImpl extends Base implements TimePicker {
   static final _reNumFormat = RegExp('[^0-9\:]');
 
   void _updateInput() {
-    input.value = time;
+    setInputValue(input, time);
   }
 
   void _fireChange(_) {
@@ -568,8 +569,8 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   void _nextTimeStep(bool add) {
-    final curStart = input.selectionStart ?? 0,
-      curEnd = input.selectionEnd ?? 0;
+    final curStart = getInputSelectionStart(input) ?? 0,
+      curEnd = getInputSelectionEnd(input) ?? 0;
 
     switch(_highlightedUnit) {
       case _HighlightUnit.hour:
@@ -592,12 +593,12 @@ class _TimePickerImpl extends Base implements TimePicker {
         break;
     }
     _updateInput();
-    input.setSelectionRange(curStart, curEnd);
+    setSelectionRange(input, curStart, curEnd);
   }
 
   void _onInput(QueryEvent event) {
     //in order to get new _hour & _minute, we call setTime without update input.value
-    final val = input.value!,
+    final val = getInputValue(input)!,
       parsedTime = parseTime(val, 0),
       parsedText = val.replaceAll(_reNumFormat, '').split(':'),
       newHour = parsedTime[0], newMinute = parsedTime[1], newSecond = at(parsedTime, 2) ?? 0;
@@ -683,11 +684,12 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   int getCursorPosition() {
-    return input.selectionStart!;
+    return getInputSelectionStart(input)!;
   }
 
   bool rangeSelected() {
-    return input.selectionEnd! - input.selectionStart! > 0;
+    return (getInputSelectionEnd(input)! 
+      - getInputSelectionStart(input)!) > 0;
   }
 }
 
@@ -711,3 +713,44 @@ _data(value, Element elem, String name, [defaultValue]) =>
     value ?? elem.dataset[name] ?? defaultValue;
 
 const _emptyVal = '––';
+
+bool isInputElement(input)
+  => input is InputElement || input is TextAreaElement;
+
+String? getInputValue(input) {
+  assert(isInputElement(input));
+  return input != null ? input.value as String: null;
+}
+
+void setInputValue(input, String value) {
+  assert(isInputElement(input));
+  if (input != null)
+    input.value = value;
+}
+
+int? getInputMaxLength(input) {
+  assert(isInputElement(input));
+  return input != null ? input.maxLength as int: null;
+}
+
+void setInputMaxLength(input, int value) {
+  assert(isInputElement(input));
+  if (input != null)
+    input.maxLength = value;
+}
+
+void setSelectionRange(input, int start, int end) {
+  assert(isInputElement(input));
+  if (input != null)
+    input.setSelectionRange(start, end);
+}
+
+int? getInputSelectionStart(input) {
+  assert(isInputElement(input));
+  return input != null ? input.selectionStart as int: null;
+}
+
+int? getInputSelectionEnd(input) {
+  assert(isInputElement(input));
+  return input != null ? input.selectionEnd as int: null;
+}

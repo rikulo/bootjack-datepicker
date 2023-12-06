@@ -1,4 +1,7 @@
 # CHANGES
+**3.0.1**
+* Support textarea for TimePicker
+
 **3.0.0**
 * Dart 3 required
 
