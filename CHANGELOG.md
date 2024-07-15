@@ -1,4 +1,7 @@
 # CHANGES
+**3.0.2**
+* Support day field for TimePicker
+
 **3.0.1**
 * Support textarea for TimePicker
 
