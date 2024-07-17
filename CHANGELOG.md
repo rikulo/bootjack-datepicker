@@ -2,6 +2,7 @@
 **3.0.2**
 * Support day field for TimePicker
 * Fixed error when typing in hh:mm format
+* Support copy and paste time
 
 **3.0.1**
 * Support textarea for TimePicker

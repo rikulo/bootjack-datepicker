@@ -136,6 +136,7 @@ class _TimePickerImpl extends Base implements TimePicker {
     
     $element
     ..on('keydown', _onKeydown)
+    ..on('keypress', _onKeypress)
     ..on('input', _onInput)
     ..on('focus click', _highlightUnit)
     ..on('blur', _fireChange);
@@ -250,7 +251,7 @@ class _TimePickerImpl extends Base implements TimePicker {
   void _highlightUnit(QueryEvent event) {
     if (event.type == 'focus')//make click event high priority
       Timer.run(_highlightUnit0);
-    else
+    else if (window.getSelection()?.toString().isEmpty ?? true)
       _highlightUnit0();
   }
   void _highlightUnit0() {
@@ -624,9 +625,17 @@ class _TimePickerImpl extends Base implements TimePicker {
     event.preventDefault();
   }
 
+  void _onKeypress(QueryEvent e) {
+    //prevent typing characters
+    final code = e.charCode,
+      inAmPm = _highlightedUnit == _HighlightUnit.ampm;
+    if (!inAmPm && !($0 <= code && code <= $9) ) {
+      e.preventDefault();
+    }
+  }
+
   void _onKeydown(QueryEvent e) {
     final key = e.keyCode,
-      inAmPm = _highlightedUnit == _HighlightUnit.ampm,
       isNum = (key >= KeyCode.ZERO && key <= KeyCode.NINE) ||
               key >= KeyCode.NUM_ZERO && key <= KeyCode.NUM_NINE;
     //prevent typing any character except numbers
@@ -667,11 +676,6 @@ class _TimePickerImpl extends Base implements TimePicker {
         case KeyCode.RIGHT:
           _updateInput();
           highlightNextUnit(key == KeyCode.RIGHT);
-          break;
-        default:
-          //prevent typing characters
-          if (!inAmPm)
-            e.preventDefault();
           break;
       }
     }
@@ -745,7 +749,7 @@ class _TimePickerImpl extends Base implements TimePicker {
               _minute = newMinute;
             },
             shallHighlight: _maxHour != null && (newHour > shallAppend0
-              || parsedText[index].length > 1));
+              || (at(parsedText, index) ?? '').length > 1));
         }
         break;
       case _HighlightUnit.minute:
@@ -755,7 +759,7 @@ class _TimePickerImpl extends Base implements TimePicker {
         _updateTime(newMinute!, _maxMinute,
             save: (final val) => _minute = val,
             shallHighlight: newMinute > 5
-              || parsedText[index + 1].length > 1);
+              || (at(parsedText, index + 1) ?? '').length > 1);
         break;
       case _HighlightUnit.second:
         if (_hour == null) incrementHour(true);
@@ -764,7 +768,7 @@ class _TimePickerImpl extends Base implements TimePicker {
         _updateTime(newSecond, _maxMinute,
             save: (final val) => _second = val,
             shallHighlight: newSecond > 5
-              || parsedText[index + 2].length > 1);
+              || (at(parsedText, index + 2) ?? '').length > 1);
         break;
       case _HighlightUnit.ampm:
         if (!_in24Hour) {

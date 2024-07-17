@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:math' show max;
 
 import 'package:intl/intl.dart';
+import "package:charcode/ascii.dart";
 
 import 'package:dquery/dquery.dart';
 import 'package:bootjack/bootjack.dart';
