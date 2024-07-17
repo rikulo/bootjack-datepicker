@@ -9,4 +9,5 @@ dependencies:
   dquery: any
   bootjack: any
   intl: any
+  charcode: any
   rikulo_commons: any
