@@ -493,7 +493,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   int? _getParsedTime(int? parsedTime, int? max) {
     return parsedTime == null ? null:
-      (max == null || parsedTime >= max) ? 0: parsedTime;
+      (max != null && parsedTime >= max) ? 0: parsedTime;
   }
 
   DateTime? _date;
