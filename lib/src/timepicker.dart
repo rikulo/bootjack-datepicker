@@ -388,8 +388,9 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   void _syncAmPm() {
-    if (_hour != null)
-      _ampmIndex = _hour! < 12 ? 0: 1;
+    final hour = _hour;
+    if (hour != null)
+      _ampmIndex = hour < 12 ? 0: 1;
   }
 
   void _initTimeVars(_HighlightUnit unit) {
@@ -560,7 +561,7 @@ class _TimePickerImpl extends Base implements TimePicker {
       h = _string2int(timeArray[i], defaultValue);
       if (!_in24Hour && h != null && h > 12) {
         final m = h%10;
-        return [1, m > 5? m: m*10];
+        return [d, 1, m > 5? m: m*10, s];
       }
     } catch (e) {
       //array index out of bound
