@@ -12,9 +12,13 @@ abstract class TimePicker {
    */
   factory TimePicker(Element element, {
       String? time, DateTime? date, int? step, int? maxHour = 24,
-      bool? enable24HourTime, bool? enableSecond, bool? enableDefaultEmpty})
+      bool? enable24HourTime, bool? enableSecond, 
+      bool? enableDay, bool? enableDayHourOnly, 
+      bool? enableDefaultEmpty})
     => _TimePickerImpl(element, time: time, date: date,
         step: step, maxHour: maxHour,
+        enableDay: enableDay,
+        enableDayHourOnly: enableDayHourOnly,
         enableSecond: enableSecond,
         enable24HourTime: enable24HourTime,
         enableDefaultEmpty: enableDefaultEmpty,
@@ -57,6 +61,8 @@ abstract class TimePicker {
   void set enableSecond(bool enable);
 
   void set enableDay(bool enable);
+
+  void set enableDayHourOnly(bool enable);
 
   /// Whether to enable default empty `--:--` (default: true).
   void set enableDefaultEmpty(bool enable);
@@ -130,7 +136,7 @@ class _TimePickerImpl extends Base implements TimePicker {
 
   _TimePickerImpl(Element element, {String? time,
     DateTime? date, int? step, bool? enable24HourTime, 
-    bool? enableSecond, bool? enableDay, 
+    bool? enableSecond, bool? enableDay, bool? enableDayHourOnly, 
     int? maxHour = 24, bool? enableDefaultEmpty}):
   super(element, TimePicker._name) {
     
@@ -150,6 +156,7 @@ class _TimePickerImpl extends Base implements TimePicker {
       || (enable24HourTime ?? element.dataset['date-24'] == 'true');
     this.enableSecond = enableSecond ?? element.dataset['second'] == 'true';
     this.enableDay = enableDay ?? element.dataset['day'] == 'true';
+    this.enableDayHourOnly = enableDayHourOnly ?? element.dataset['day-hour'] == 'true';
     this.enableDefaultEmpty = enableDefaultEmpty ?? element.dataset['default-empty'] != 'false';
     this._locale0 = _data(null, element, 'date-locale', Intl.systemLocale);
 
@@ -166,12 +173,16 @@ class _TimePickerImpl extends Base implements TimePicker {
   int _ampmIndex = 0;
   _HighlightUnit? _highlightedUnit;
 
-  bool _in24Hour = false, _enableDay = false,
-    _enableSecond = false, _enableDefaultEmpty = true;
+  bool _in24Hour = false, _enableDay0 = false, _enableDayHourOnly = false,
+    _enableSecond0 = false, _enableDefaultEmpty = true;
   late String _locale;
   late List<String> _ampms;
 
   int? get _maxHour => _enableDay ? 24: _maxHour0;
+
+  bool get _enableDay => _enableDayHourOnly || _enableDay0;
+
+  bool get _enableSecond => !_enableDayHourOnly && _enableSecond0;
 
   @override
   int get step => _step ?? _defaultStep;
@@ -180,13 +191,16 @@ class _TimePickerImpl extends Base implements TimePicker {
   void set step(int? s) => _step = s ?? _defaultStep;
 
   @override
+  void set enableDayHourOnly(bool enable) => _enableDayHourOnly = enable;
+
+  @override
   void set enable24HourTime(bool enable) => _in24Hour = enable;
 
   @override
-  void set enableDay(bool enable) => _enableDay = enable;
+  void set enableDay(bool enable) => _enableDay0 = enable;
 
   @override
-  void set enableSecond(bool enable) => _enableSecond = enable;
+  void set enableSecond(bool enable) => _enableSecond0 = enable;
   
   @override
   void set enableDefaultEmpty(bool enable) => _enableDefaultEmpty = enable;
@@ -287,9 +301,12 @@ class _TimePickerImpl extends Base implements TimePicker {
           highlightAmPm();
         break;
       case _HighlightUnit.hour:
-        if (right)
-          highlightMinute();
-        else if (_enableDay)
+        if (right) {
+          if (_enableDayHourOnly)
+            highlightAmPm();
+          else
+            highlightMinute();
+        } else if (_enableDay)
           highlightDay();
         else if (!_in24Hour)
           highlightAmPm();
@@ -315,7 +332,8 @@ class _TimePickerImpl extends Base implements TimePicker {
       case _HighlightUnit.ampm:
         if (!_in24Hour) //just in case
           right ? _enableDay ? highlightDay(): highlightHour(): 
-            _enableSecond? highlightSecond(): highlightMinute();
+            _enableDayHourOnly ? highlightHour():
+            _enableSecond ? highlightSecond(): highlightMinute();
         break;
       case null:
         break;
@@ -374,7 +392,8 @@ class _TimePickerImpl extends Base implements TimePicker {
   }
 
   void _highlightAmPm() {
-    setSelectionRange(input, _hourEndIndex + (_enableSecond ? 6: 3), 
+    setSelectionRange(input, _hourEndIndex 
+      + (_enableSecond ? 6: _enableDayHourOnly ? 0: 3), 
       getInputMaxLength(input)!);
   }
 
@@ -467,9 +486,10 @@ class _TimePickerImpl extends Base implements TimePicker {
     final hour0 = _hour,
       second0 = _enableSecond ? ':$second': '',
       day0 = _enableDay ? '$day:': '',
-      time = _in24Hour ? '$hour:$minute$second0':
+      time = _in24Hour ? _enableDayHourOnly ? hour: '$hour:$minute$second0':
         '${hour0 == null ? _emptyVal: hour0 == 0 ? '12':
-        hour0 > 12 ? '${hour0 < 22 ? '0': ''}${hour0 - 12}': hour}:$minute$second0 ${_ampms[_ampmIndex]}';
+        hour0 > 12 ? '${hour0 < 22 ? '0': ''}${hour0 - 12}': hour}'
+        '${_enableDayHourOnly ? '': ':$minute$second0'} ${_ampms[_ampmIndex]}';
 
     return '$day0$time';
   }
@@ -562,7 +582,8 @@ class _TimePickerImpl extends Base implements TimePicker {
       h = _string2int(timeArray[i], defaultValue);
       if (!_in24Hour && h != null && h > 12) {
         final m = h%10;
-        return [d, 1, m > 5? m: m*10, s];
+        return _enableDayHourOnly ? [d, 1, 0, 0]: 
+          [d, 1, m > 5? m: m*10, s];
       }
     } catch (e) {
       //array index out of bound
@@ -582,7 +603,8 @@ class _TimePickerImpl extends Base implements TimePicker {
       //array index out of bound
       s = defaultValue;
     }
-    return [d, h, m, s];
+    return _enableDayHourOnly ? [d, h, 0, 0]: 
+      [d, h, m, s];
   }
 
   static final _reNumFormat = RegExp('[^0-9\:]');
@@ -772,7 +794,7 @@ class _TimePickerImpl extends Base implements TimePicker {
         break;
       case _HighlightUnit.ampm:
         if (!_in24Hour) {
-          if (val.length > (_hourEndIndex + 4 + (_enableSecond ? 3: 0))) {
+          if (val.length > (_hourEndIndex + (_enableSecond ? 7: _enableDayHourOnly ? 1: 4))) {
             if (_hour == null) incrementHour(true);
             final newAmPm = val.substring(_enableSecond ? 9: 6).toLowerCase();
 

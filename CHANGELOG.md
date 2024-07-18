@@ -1,4 +1,7 @@
 # CHANGES
+**3.0.3**
+* Support day hour field only for TimePicker
+
 **3.0.2**
 * Support day field for TimePicker
 * Fixed error when typing in hh:mm format
