@@ -87,6 +87,9 @@ abstract class TimePicker {
 
   List<int?> get timeValues;
 
+  /// highlight first field
+  void highlight();
+
   void highlightDay();
   void highlightHour();
   void highlightMinute();
@@ -340,7 +343,15 @@ class _TimePickerImpl extends Base implements TimePicker {
     }
   }
 
-   @override
+  @override
+  void highlight() {
+    if (_enableDay)
+      highlightDay();
+    else
+      highlightHour();
+  }
+
+  @override
   void highlightDay() {
     _highlightedUnit = _HighlightUnit.day;
     Timer.run(_highlightDay);
@@ -742,7 +753,7 @@ class _TimePickerImpl extends Base implements TimePicker {
       parsedText = val.replaceAll(_reNumFormat, '').split(':'),
       newDay = parsedTime[0], 
       newHour = parsedTime[1], 
-      newMinute = parsedTime[2], 
+      newMinute = parsedTime[2] ?? 0, 
       newSecond = at(parsedTime, 3) ?? 0,
       index = _enableDay ? 1: 0;
 
@@ -778,7 +789,7 @@ class _TimePickerImpl extends Base implements TimePicker {
         if (_hour == null) incrementHour(true);
         if (_second == null) _second = 0;
 
-        _updateTime(newMinute!, _maxMinute,
+        _updateTime(newMinute, _maxMinute,
             save: (final val) => _minute = val,
             shallHighlight: newMinute > 5
               || (at(parsedText, index + 1) ?? '').length > 1);
