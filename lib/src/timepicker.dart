@@ -268,7 +268,7 @@ class _TimePickerImpl extends Base implements TimePicker {
   void _highlightUnit(QueryEvent event) {
     if (event.type == 'focus')//make click event high priority
       Timer.run(_highlightUnit0);
-    else if (window.getSelection()?.toString().isEmpty ?? true)
+    else if (getInputSelectionStart(input) == getInputSelectionEnd(input))
       _highlightUnit0();
   }
   void _highlightUnit0() {
