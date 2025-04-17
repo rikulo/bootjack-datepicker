@@ -1,4 +1,7 @@
 # CHANGES
+**4.0.0**
+* Dart 3.7 required
+
 **3.0.3**
 * Support day hour field only for TimePicker
 * Support highlight first field

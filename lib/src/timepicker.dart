@@ -152,15 +152,15 @@ class _TimePickerImpl extends Base implements TimePicker {
 
     element.onMouseWheel.listen(_doMousewheel);
 
-    final maxStr = element.dataset['max-hour'];
+    final maxStr = element.getAttribute('data-max-hour');
     _maxHour0 = maxStr != null ? int.tryParse(maxStr): maxHour;
 
     this.enable24HourTime = _maxHour == null 
-      || (enable24HourTime ?? element.dataset['date-24'] == 'true');
-    this.enableSecond = enableSecond ?? element.dataset['second'] == 'true';
-    this.enableDay = enableDay ?? element.dataset['day'] == 'true';
-    this.enableDayHourOnly = enableDayHourOnly ?? element.dataset['day-hour'] == 'true';
-    this.enableDefaultEmpty = enableDefaultEmpty ?? element.dataset['default-empty'] != 'false';
+      || (enable24HourTime ?? element.getAttribute('data-date-24') == 'true');
+    this.enableSecond = enableSecond ?? element.getAttribute('data-second') == 'true';
+    this.enableDay = enableDay ?? element.getAttribute('data-day') == 'true';
+    this.enableDayHourOnly = enableDayHourOnly ?? element.getAttribute('data-day-hour') == 'true';
+    this.enableDefaultEmpty = enableDefaultEmpty ?? element.getAttribute('data-default-empty') != 'false';
     this._locale0 = _data(null, element, 'date-locale', Intl.systemLocale);
 
     //input.value count on
@@ -871,12 +871,12 @@ String _date2time(DateTime date, [String defaultValue]) {
 */
 
 _data(value, Element elem, String name, [defaultValue]) =>
-    value ?? elem.dataset[name] ?? defaultValue;
+    value ?? elem.getAttribute('data-$name') ?? defaultValue;
 
 const _emptyVal = '––';
 
 bool isInputElement(input)
-  => input is InputElement || input is TextAreaElement;
+  => input is Element && (input.isA<HTMLInputElement>() || input.isA<HTMLTextAreaElement>());
 
 String? getInputValue(input) {
   assert(isInputElement(input));

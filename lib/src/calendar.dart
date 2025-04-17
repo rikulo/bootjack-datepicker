@@ -9,81 +9,67 @@ class Calendar extends Base {
   static const month = 'month';
   static const year = 'year';
   
-  static const _calendarTemplate = '''
-<table class="cnt" width="100%" border="0" cellspacing="0" cellpadding="0">
-  <tr class="header">
-    <th colspan="7">
-      <a class="left-icon"><i class="icon-caret-left"></i></a>
-      <a class="title"></a>
-      <a class="right-icon"><i class="icon-caret-right"></i></a>
-    </th>
-  </tr>
-</table>
-''';
-  static const _dowTemplate = '''
-<tr class="dow">
-  <th class="wkend"></th>
-  <th class="wkday"></th>
-  <th class="wkday"></th>
-  <th class="wkday"></th>
-  <th class="wkday"></th>
-  <th class="wkday"></th>
-  <th class="wkend"></th>
-</tr>
-''';
-  static const _dowWithWeekNumbersTemplate = '''
-<tr class="dow">
-  <th class="wn"></th>
-  <th class="wkend"></th>
-  <th class="wkday"></th>
-  <th class="wkday"></th>
-  <th class="wkday"></th>
-  <th class="wkday"></th>
-  <th class="wkday"></th>
-  <th class="wkend"></th>
-</tr>
-''';
-  static const _dayrowTemplate = '''
-<tr class="dayrow">
-  <td class="day wkend"></td>
-  <td class="day wkday"></td>
-  <td class="day wkday"></td>
-  <td class="day wkday"></td>
-  <td class="day wkday"></td>
-  <td class="day wkday"></td>
-  <td class="day wkend"></td>
-</tr>
-''';
-  static const _dayrowWithWeekNumbersTemplate = '''
-<tr class="dayrow">
-  <td class="wn"></td>
-  <td class="day wkend"></td>
-  <td class="day wkday"></td>
-  <td class="day wkday"></td>
-  <td class="day wkday"></td>
-  <td class="day wkday"></td>
-  <td class="day wkday"></td>
-  <td class="day wkend"></td>
-</tr>
-''';
-  static const _cell12rowTemplate = '''
-<tr class="cell12row">
-  <td colspan="7">
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-  </td>
-</tr>
-''';
+  static const _calendarTemplate = 
+'<table class="cnt" width="100%" border="0" cellspacing="0" cellpadding="0">'
+  '<tr class="header">'
+    '<th colspan="7">'
+      '<a class="left-icon"><i class="icon-caret-left"></i></a>'
+      '<a class="title"></a>'
+      '<a class="right-icon"><i class="icon-caret-right"></i></a>'
+    '</th>'
+  '</tr>'
+'</table>';
+  static const _dowTemplate = 
+  '<th class="wkend"></th>'
+  '<th class="wkday"></th>'
+  '<th class="wkday"></th>'
+  '<th class="wkday"></th>'
+  '<th class="wkday"></th>'
+  '<th class="wkday"></th>'
+  '<th class="wkend"></th>';
+
+  static const _dowWithWeekNumbersTemplate = 
+  '<th class="wn"></th>'
+  '<th class="wkend"></th>'
+  '<th class="wkday"></th>'
+  '<th class="wkday"></th>'
+  '<th class="wkday"></th>'
+  '<th class="wkday"></th>'
+  '<th class="wkday"></th>'
+  '<th class="wkend"></th>';
+
+  static const _dayrowTemplate = 
+  '<td class="day wkend"></td>'
+  '<td class="day wkday"></td>'
+  '<td class="day wkday"></td>'
+  '<td class="day wkday"></td>'
+  '<td class="day wkday"></td>'
+  '<td class="day wkday"></td>'
+  '<td class="day wkend"></td>';
+  static const _dayrowWithWeekNumbersTemplate = 
+  '<td class="wn"></td>'
+  '<td class="day wkend"></td>'
+  '<td class="day wkday"></td>'
+  '<td class="day wkday"></td>'
+  '<td class="day wkday"></td>'
+  '<td class="day wkday"></td>'
+  '<td class="day wkday"></td>'
+  '<td class="day wkend"></td>';
+  static const _cell12rowTemplate = 
+  '<td colspan="7">'
+    '<span></span>'
+    '<span></span>'
+    '<span></span>'
+    '<span></span>'
+    '<span></span>'
+    '<span></span>'
+    '<span></span>'
+    '<span></span>'
+    '<span></span>'
+    '<span></span>'
+    '<span></span>'
+    '<span></span>'
+  '</td>';
 
   String _format;
   
@@ -193,7 +179,7 @@ class Calendar extends Base {
   this._value = value,
   this._currentValue = value,
   this._newDate = newDate,
-  this.displayWeekNumbers = displayWeekNumbers ?? element.dataset['weeknumbers'] == 'true',
+  this.displayWeekNumbers = displayWeekNumbers ?? element.getAttribute('data-weeknumbers') == 'true',
   super(element, _name) {
     _view = this.dateGranularity;
     _initCalendar();
@@ -226,7 +212,7 @@ class Calendar extends Base {
     }
     
     element
-    ..innerHtml = _calendarTemplate
+    ..innerHTML = _calendarTemplate.toJS
     ..onMouseWheel.listen(_doMousewheel);
     
     $(element)
@@ -244,7 +230,9 @@ class Calendar extends Base {
     $element.on('change.bs.calendar', _onCalChange);
     
     if (_dataTargetSelector != null) {
-      querySelectorAll(_dataTargetSelector!).forEach(_bindCalendarValue);
+      for (final elem in JSImmutableListWrapper(
+          document.querySelectorAll(_dataTargetSelector!)).cast<Element>())
+        _bindCalendarValue(elem);
     }
   }
   
@@ -252,33 +240,36 @@ class Calendar extends Base {
     if (_view != dateGranularity) return;
     
     if (_dataTargetSelector != null) {
-      querySelectorAll(_dataTargetSelector!).forEach((Element elem) {
-        if (elem is InputElement) {
-          elem.value = _date;
+      for (final elem in JSImmutableListWrapper(
+          document.querySelectorAll(_dataTargetSelector!)).cast<Element>()) {
+        if (elem.isA<HTMLInputElement>() && elem is HTMLInputElement) {
+          elem.value = _date ?? '';
           _updateChange(elem);//for clear error and fire change
         } else {
           //todo bind text to label? e.innerHtml = _date;
         }
-      });
+      }
     }
     
     //Close dropdown
     if (e.data == null || e.data['shallClose'] != false) {
-      var p = element.parent;
-      if (p != null && (p = p.parent) != null && p!.classes.contains('open')) {
+      var p = element.parentElement;
+      if (p != null && (p = p.parentElement) != null && p!.classList.contains('open')) {
         $document().trigger('click.bs.dropdown.data-api');
       }
     }
   }
   
   void _bindCalendarValue(Element elem) {//element value to cal
-    if (elem is InputElement) {
-      elem.addEventListener("change", (_) => _updateChange(elem));
+    if (elem.isA<HTMLInputElement>()) {
+      elem.addEventListener("change", (Event e) {
+        _updateChange(elem as HTMLInputElement);
+      }.toJS);
     }
   }
   
-  void _updateChange(InputElement inp) {
-    final text = inp.value!;
+  void _updateChange(HTMLInputElement inp) {
+    final text = inp.value;
     try {
       final val = DateFormat(format, locale).parse(text);
       _clearError(inp);
@@ -291,16 +282,16 @@ class Calendar extends Base {
   }
   
   void _clearError(Element inp) {
-    final p = inp.parent;
+    final p = inp.parentElement;
     if (p != null)
-      p.classes.remove('has-error');
+      p.classList.remove('has-error');
     $(inp).trigger('error.bs.datepicker');
   }
   
   void _markError(Element inp) {
-    final p = inp.parent;
+    final p = inp.parentElement;
     if (p != null)
-      p.classes.add('has-error');
+      p.classList.add('has-error');
   }
   
   void _setView(String view) {
@@ -308,17 +299,17 @@ class Calendar extends Base {
     //clear tbody
     var dow = element.querySelector('.dow'),
       cell12row = element.querySelector('.cell12row'),
-      dayrow = element.querySelectorAll('.dayrow');
+      dayrow = JSImmutableListWrapper(element.querySelectorAll('.dayrow'));
     if (cell12row != null)
       cell12row.remove();
     if (dow != null)
       dow.remove();
-    for (final e in dayrow) {
+    for (final e in dayrow.cast<Element>()) {
       e.remove();
     }
 
     //reset colspan
-    final header = element.querySelector('.header > th') as TableCellElement?;
+    final header = element.querySelector('.header > th') as HTMLTableCellElement?;
     header?.colSpan = 7;
 
     this._view = view;
@@ -345,41 +336,38 @@ class Calendar extends Base {
   }
   
   void _dayView() {
-    final calBody = element.querySelector('.cnt') as TableElement,
+    final table = element.querySelector('.cnt') as HTMLTableElement,
       dowTemplate = displayWeekNumbers ? _dowWithWeekNumbersTemplate : _dowTemplate,
       dayrowTemplate = displayWeekNumbers ? _dayrowWithWeekNumbersTemplate : _dayrowTemplate,
       startPos = displayWeekNumbers ? 1 : 0,
-      dow = calBody.tBodies[0].createFragment(dowTemplate).children[0],
+      dow = _createTableRowElement('dow', dowTemplate),
       children = dow.children,
       swkDays = _dfmt.dateSymbols.SHORTWEEKDAYS,
       ofs = (_firstDayOfWeek + 1) % 7;
 
-    final header = element.querySelector('.header > th') as TableCellElement;
+    final header = element.querySelector('.header > th') as HTMLTableCellElement;
     header.colSpan = displayWeekNumbers ? 8 : 7;
 
     //render week days
     for (var i = swkDays.length; --i >= 0;) {
-      children[startPos + i].text = swkDays[(i + ofs) % 7];
+      children.item(startPos + i)!.textContent = swkDays[(i + ofs) % 7];
     }
 
-    final buffer = StringBuffer();
+    final tbody = (table.tBodies.item(0) as HTMLElement);
+    tbody.append(dow);
     for (var i = 6; --i >= 0;) {
-      buffer.write(dayrowTemplate);
+      tbody.append(_createTableRowElement('dayrow', dayrowTemplate));
     }
-    
-    calBody.tBodies[0]
-    ..append(dow)
-    ..appendHtml(buffer.toString(), treeSanitizer: NodeTreeSanitizer.trusted);
   }
   
   void _cell12View(List<String> labels) {
-    final body = (element.querySelector('.cnt') as TableElement).tBodies.first,
-      cell12row = body.createFragment(_cell12rowTemplate).children[0],
-      children = cell12row.children.first.children;
+    final body = (element.querySelector('.cnt') as HTMLTableElement).tBodies.item(0)!,
+      cell12row = _createTableRowElement('cell12row', _cell12rowTemplate),
+      children = cell12row.children.item(0)!.children;
     
     //render month
     for (int i = labels.length; --i >= 0;) {
-      children[i].text = labels[i];
+      children.item(i)!.textContent = labels[i];
     }
     
     body.append(cell12row);
@@ -388,11 +376,11 @@ class Calendar extends Base {
   void _markCal() {
     final seld = element.querySelector('.cnt .seld');
     if (seld != null)
-      seld.classes.remove('seld');
+      seld.classList.remove('seld');
 
     final todayElem = element.querySelector('.cnt .today');
     if (todayElem != null)
-      todayElem.classes.remove('today');
+      todayElem.classList.remove('today');
 
     final isNullValue = _value == null,
       today = _setDateValue(todayUtc())!;
@@ -418,31 +406,31 @@ class Calendar extends Base {
       final inTodayRange = _inDayViewRange(beginDate, today),
         inSelectedDayRange = _value == null ? false: _inDayViewRange(beginDate, _value!);
       
-      title.text = '${_dfmt.dateSymbols.SHORTMONTHS[m - 1]} $y';
-      final dayrow = element.querySelectorAll('.dayrow'),
-        outside = element.querySelectorAll('.dayrow td.outside');
+      title.textContent = '${_dfmt.dateSymbols.SHORTMONTHS[m - 1]} $y';
+      final dayrow = JSImmutableListWrapper(element.querySelectorAll('.dayrow')).cast<HTMLElement>(),
+        outside = JSImmutableListWrapper(element.querySelectorAll('.dayrow td.outside')).cast<HTMLElement>();
       for (final e in outside) {
-        e.classes.remove('outside');
+        e.classList.remove('outside');
       }
       
       for (final row in dayrow) {
         final len = row.children.length;
         for (var i = 0; i < len; i++) {
-          final td = row.children[i];
+          final td = row.children.item(i)!;
           if (i == 0 && displayWeekNumbers) { // Week numbers
-            td.text = _getWeekOfYear(beginDate, _firstDayOfWeek).toString();
+            td.textContent = _getWeekOfYear(beginDate, _firstDayOfWeek).toString();
             renderWeekNumber(td);
             continue;
           }
 
-          td.text = '${beginDate.day}';
+          td.textContent = '${beginDate.day}';
           if (begin == null)
             begin = beginDate;
           renderDay(td, beginDate);
           
           var monofs = 0;
           if (beginDate.month != m) {
-            td.classes.add('outside');
+            td.classList.add('outside');
             
             int curY = beginDate.year;
             if (curY == y) {
@@ -455,12 +443,12 @@ class Calendar extends Base {
           
           if (inSelectedDayRange && beginDate.month == _value!.month
               && beginDate.day == _value!.day){
-            td.classes.add('seld');
+            td.classList.add('seld');
             renderSelectedDay(td);
           }
           
           if (inTodayRange && beginDate.month == today.month && beginDate.day == today.day) {
-            td.classes.add('today');
+            td.classList.add('today');
             renderToDay(td);
           }
           
@@ -478,10 +466,10 @@ class Calendar extends Base {
         yofs = 0;
       
       if (isMon)
-        title.text = '$y';
+        title.textContent = '$y';
       else {
         yofs = y - index;
-        title.text = '$yofs-${yofs + 11}';
+        title.textContent = '$yofs-${yofs + 11}';
         yofs += 11;
       }
 
@@ -496,20 +484,22 @@ class Calendar extends Base {
         }
       }
 
-      List<Element> cell12row = element.querySelectorAll('.cell12row span');
+      final cell12row = element.querySelectorAll('.cell12row span');
       DateTime? date;
       for (var i = cell12row.length; --i >= 0; yofs--) {
-        final cell = cell12row[i];
+        final cell = cell12row.item(i);
+        if (cell is! Element) continue;
+
         if (!isMon)
-          cell.text = '$yofs';
+          cell.textContent = '$yofs';
 
         date = isMon ? _newDateTime(y, i + 1, 1, true): _newDateTime(yofs, 1, 1, true);
         if (end == null)
             end = date;
         renderDay(cell, date);
         if (inSelectedDayRange && index == i) {
-          cell.classes.add('seld');
-          renderSelectedDay(cell12row[i]);
+          cell.classList.add('seld');
+          renderSelectedDay(cell);
         }
       }
 
@@ -558,7 +548,7 @@ class Calendar extends Base {
   
   void _clickArrow(QueryEvent evt) {
     _shiftView((evt.currentTarget as Element)
-        .classes.contains('left-icon') ? -1: 1);
+        .classList.contains('left-icon') ? -1: 1);
     evt.stopPropagation();
   }
   
@@ -707,7 +697,7 @@ class Calendar extends Base {
 }
 
 _data(value, Element elem, String name, [defaultValue]) =>
-    value ?? elem.dataset[name] ?? defaultValue;
+    value ?? elem.getAttribute('data-$name') ?? defaultValue;
 
 /// Returns a 0-based [weekday] index, according to [firstDayOfWeek].
 /// * [weekday] should be [DateTime.weekday] (1-based)
@@ -725,4 +715,10 @@ int _getWeekOfYear(DateTime date, [int firstDayOfWeek = 0]) {
     yearStart = DateTime.utc(thursday.year, DateTime.january , 1),
     millisDiff = thursday.millisecondsSinceEpoch - yearStart.millisecondsSinceEpoch;
   return (((millisDiff / 86400000) + 1) / 7).ceil();
+}
+
+HTMLElement _createTableRowElement(String className, String html) {
+  final tr = HTMLTableRowElement()..className = className;
+  tr.setHTMLUnsafe(html.toJS);
+  return tr;
 }

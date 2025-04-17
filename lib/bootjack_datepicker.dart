@@ -3,7 +3,9 @@
 // Author: jimmyshiau
 library bootjack_datepicker;
 
-import 'dart:html';
+import 'dart:js_interop';
+
+import 'package:web/web.dart';
 
 import 'package:intl/intl.dart';
 

@@ -3,9 +3,10 @@
 // Author: chunfuchang
 library bootjack_timepicker;
 
-import 'dart:html';
+import 'package:web/web.dart';
 import 'dart:async';
 import 'dart:math' show max;
+import 'dart:js_interop';
 
 import 'package:intl/intl.dart';
 import "package:charcode/ascii.dart";
