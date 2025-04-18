@@ -20,56 +20,66 @@ class Calendar extends Base {
   '</tr>'
 '</table>';
   static const _dowTemplate = 
-  '<th class="wkend"></th>'
-  '<th class="wkday"></th>'
-  '<th class="wkday"></th>'
-  '<th class="wkday"></th>'
-  '<th class="wkday"></th>'
-  '<th class="wkday"></th>'
-  '<th class="wkend"></th>';
+  '<tr class="dow">'
+    '<th class="wkend"></th>'
+    '<th class="wkday"></th>'
+    '<th class="wkday"></th>'
+    '<th class="wkday"></th>'
+    '<th class="wkday"></th>'
+    '<th class="wkday"></th>'
+    '<th class="wkend"></th>'
+  '</tr>';
 
   static const _dowWithWeekNumbersTemplate = 
-  '<th class="wn"></th>'
-  '<th class="wkend"></th>'
-  '<th class="wkday"></th>'
-  '<th class="wkday"></th>'
-  '<th class="wkday"></th>'
-  '<th class="wkday"></th>'
-  '<th class="wkday"></th>'
-  '<th class="wkend"></th>';
+  '<tr class="dow">'
+    '<th class="wn"></th>'
+    '<th class="wkend"></th>'
+    '<th class="wkday"></th>'
+    '<th class="wkday"></th>'
+    '<th class="wkday"></th>'
+    '<th class="wkday"></th>'
+    '<th class="wkday"></th>'
+    '<th class="wkend"></th>'
+  '</tr>';
 
   static const _dayrowTemplate = 
-  '<td class="day wkend"></td>'
-  '<td class="day wkday"></td>'
-  '<td class="day wkday"></td>'
-  '<td class="day wkday"></td>'
-  '<td class="day wkday"></td>'
-  '<td class="day wkday"></td>'
-  '<td class="day wkend"></td>';
+  '<tr class="dayrow">'
+    '<td class="day wkend"></td>'
+    '<td class="day wkday"></td>'
+    '<td class="day wkday"></td>'
+    '<td class="day wkday"></td>'
+    '<td class="day wkday"></td>'
+    '<td class="day wkday"></td>'
+    '<td class="day wkend"></td>'
+  '</tr>';
   static const _dayrowWithWeekNumbersTemplate = 
-  '<td class="wn"></td>'
-  '<td class="day wkend"></td>'
-  '<td class="day wkday"></td>'
-  '<td class="day wkday"></td>'
-  '<td class="day wkday"></td>'
-  '<td class="day wkday"></td>'
-  '<td class="day wkday"></td>'
-  '<td class="day wkend"></td>';
+  '<tr class="dayrow">'
+    '<td class="wn"></td>'
+    '<td class="day wkend"></td>'
+    '<td class="day wkday"></td>'
+    '<td class="day wkday"></td>'
+    '<td class="day wkday"></td>'
+    '<td class="day wkday"></td>'
+    '<td class="day wkday"></td>'
+    '<td class="day wkend"></td>'
+  '</tr>';
   static const _cell12rowTemplate = 
-  '<td colspan="7">'
-    '<span></span>'
-    '<span></span>'
-    '<span></span>'
-    '<span></span>'
-    '<span></span>'
-    '<span></span>'
-    '<span></span>'
-    '<span></span>'
-    '<span></span>'
-    '<span></span>'
-    '<span></span>'
-    '<span></span>'
-  '</td>';
+  '<tr class="cell12row">'
+    '<td colspan="7">'
+      '<span></span>'
+      '<span></span>'
+      '<span></span>'
+      '<span></span>'
+      '<span></span>'
+      '<span></span>'
+      '<span></span>'
+      '<span></span>'
+      '<span></span>'
+      '<span></span>'
+      '<span></span>'
+      '<span></span>'
+    '</td>'
+  '</tr>';
 
   String _format;
   
@@ -340,7 +350,7 @@ class Calendar extends Base {
       dowTemplate = displayWeekNumbers ? _dowWithWeekNumbersTemplate : _dowTemplate,
       dayrowTemplate = displayWeekNumbers ? _dayrowWithWeekNumbersTemplate : _dayrowTemplate,
       startPos = displayWeekNumbers ? 1 : 0,
-      dow = _createTableRowElement('dow', dowTemplate),
+      dow = createUncheckedHtml(dowTemplate),
       children = dow.children,
       swkDays = _dfmt.dateSymbols.SHORTWEEKDAYS,
       ofs = (_firstDayOfWeek + 1) % 7;
@@ -353,16 +363,19 @@ class Calendar extends Base {
       children.item(startPos + i)!.textContent = swkDays[(i + ofs) % 7];
     }
 
-    final tbody = (table.tBodies.item(0) as HTMLElement);
-    tbody.append(dow);
+    final buffer = StringBuffer();
     for (var i = 6; --i >= 0;) {
-      tbody.append(_createTableRowElement('dayrow', dayrowTemplate));
+      buffer.write(dayrowTemplate);
     }
+
+    (table.tBodies.item(0) as HTMLElement)
+      ..append(dow)
+      ..insertAdjacentHTML('beforeend', buffer.toString().toJS);
   }
   
   void _cell12View(List<String> labels) {
     final body = (element.querySelector('.cnt') as HTMLTableElement).tBodies.item(0)!,
-      cell12row = _createTableRowElement('cell12row', _cell12rowTemplate),
+      cell12row = createUncheckedHtml(_cell12rowTemplate),
       children = cell12row.children.item(0)!.children;
     
     //render month
@@ -715,10 +728,4 @@ int _getWeekOfYear(DateTime date, [int firstDayOfWeek = 0]) {
     yearStart = DateTime.utc(thursday.year, DateTime.january , 1),
     millisDiff = thursday.millisecondsSinceEpoch - yearStart.millisecondsSinceEpoch;
   return (((millisDiff / 86400000) + 1) / 7).ceil();
-}
-
-HTMLElement _createTableRowElement(String className, String html) {
-  final tr = HTMLTableRowElement()..className = className;
-  tr.setHTMLUnsafe(html.toJS);
-  return tr;
 }
