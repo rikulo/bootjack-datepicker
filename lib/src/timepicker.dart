@@ -886,7 +886,7 @@ String? getInputValue(input) {
 void setInputValue(input, String value) {
   assert(isInputElement(input));
   if (input != null)
-    input.value = value;
+    input.value = value.toJS;
 }
 
 int? getInputMaxLength(input) {
