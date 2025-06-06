@@ -516,7 +516,7 @@ class _TimePickerImpl extends Base implements TimePicker {
     _day = _getParsedTime(parsedTime[0], null);
     _hour = _getParsedTime(parsedTime[1], _maxHour);
     _minute = _getParsedTime(parsedTime[2], _maxMinute);
-    _second = _getParsedTime(parsedTime[3], 999);
+    _second = _getParsedTime(parsedTime[3], _maxMinute);
 
     _syncAmPm();
     _updateInput();
