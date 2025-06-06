@@ -516,7 +516,7 @@ class _TimePickerImpl extends Base implements TimePicker {
     _day = _getParsedTime(parsedTime[0], null);
     _hour = _getParsedTime(parsedTime[1], _maxHour);
     _minute = _getParsedTime(parsedTime[2], _maxMinute);
-    _second = _getParsedTime(parsedTime[3], _maxMinute);
+    _second = _getParsedTime(parsedTime[3], 999);
 
     _syncAmPm();
     _updateInput();
@@ -880,38 +880,60 @@ bool isInputElement(input)
 
 String? getInputValue(input) {
   assert(isInputElement(input));
-  return input != null ? input.value as String: null;
+  return switch(input) {
+    HTMLInputElement _ when input.isA<HTMLInputElement>() => input.value,
+    HTMLTextAreaElement _ when input.isA<HTMLTextAreaElement>() => input.value,
+    _ => null
+  };
 }
 
 void setInputValue(input, String value) {
   assert(isInputElement(input));
-  if (input != null)
-    input.value = value.toJS;
+  if (input is HTMLInputElement && input.isA<HTMLInputElement>())
+    input.value = value;
+  else if (input is HTMLTextAreaElement && input.isA<HTMLTextAreaElement>())
+    input.value = value;
 }
 
 int? getInputMaxLength(input) {
   assert(isInputElement(input));
-  return input != null ? input.maxLength as int: null;
+  return switch(input) {
+    HTMLInputElement _ when input.isA<HTMLInputElement>() => input.maxLength,
+    HTMLTextAreaElement _ when input.isA<HTMLTextAreaElement>() => input.maxLength,
+    _ => null
+  };
 }
 
 void setInputMaxLength(input, int value) {
   assert(isInputElement(input));
-  if (input != null)
+  if (input is HTMLInputElement && input.isA<HTMLInputElement>())
+    input.maxLength = value;
+  else if (input is HTMLTextAreaElement && input.isA<HTMLTextAreaElement>())
     input.maxLength = value;
 }
 
 void setSelectionRange(input, int start, int end) {
   assert(isInputElement(input));
-  if (input != null)
+  if (input is HTMLInputElement && input.isA<HTMLInputElement>())
+    input.setSelectionRange(start, end);
+  else if (input is HTMLTextAreaElement && input.isA<HTMLTextAreaElement>())
     input.setSelectionRange(start, end);
 }
 
 int? getInputSelectionStart(input) {
   assert(isInputElement(input));
-  return input != null ? input.selectionStart as int: null;
+  return switch(input) {
+    HTMLInputElement _ when input.isA<HTMLInputElement>() => input.selectionStart,
+    HTMLTextAreaElement _ when input.isA<HTMLTextAreaElement>() => input.selectionStart,
+    _ => null
+  };
 }
 
 int? getInputSelectionEnd(input) {
   assert(isInputElement(input));
-  return input != null ? input.selectionEnd as int: null;
+  return switch(input) {
+    HTMLInputElement _ when input.isA<HTMLInputElement>() => input.selectionEnd,
+    HTMLTextAreaElement _ when input.isA<HTMLTextAreaElement>() => input.selectionEnd,
+    _ => null
+  };
 }
