@@ -1,4 +1,7 @@
 # CHANGES
+**4.0.1**
+* Fixed AM/PM not applied when typing a/p in 12-hour format
+
 **4.0.0**
 * Dart 3.7 required
 

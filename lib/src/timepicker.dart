@@ -402,10 +402,12 @@ class _TimePickerImpl extends Base implements TimePicker {
     Timer.run(_highlightAmPm);
   }
 
+  /// The index where the AM/PM part starts in the input value.
+  int get _ampmStartIndex => _hourEndIndex
+      + (_enableSecond ? 6: _enableDayHourOnly ? 0: 3);
+
   void _highlightAmPm() {
-    setSelectionRange(input, _hourEndIndex 
-      + (_enableSecond ? 6: _enableDayHourOnly ? 0: 3), 
-      getInputMaxLength(input)!);
+    setSelectionRange(input, _ampmStartIndex, getInputMaxLength(input)!);
   }
 
   @override
@@ -805,25 +807,26 @@ class _TimePickerImpl extends Base implements TimePicker {
         break;
       case _HighlightUnit.ampm:
         if (!_in24Hour) {
-          if (val.length > (_hourEndIndex + (_enableSecond ? 7: _enableDayHourOnly ? 1: 4))) {
+          //the AM/PM part is selected as a whole (spaces included), so the
+          //typed text can be shorter than the original one, e.g. '05:00p'
+          final start = _ampmStartIndex,
+            typed = val.length > start ?
+              val.substring(start).trim().toLowerCase(): '';
+
+          if (typed.isNotEmpty) {
             if (_hour == null) incrementHour(true);
-            final newAmPm = val.substring(_enableSecond ? 9: 6).toLowerCase();
+            final newAmPm = typed[0];
 
             if (newAmPm == 'a' || newAmPm == _ampms[0].toLowerCase()[0]) {
               if (_hour! >= 12)
                 toggleAmPm();
-              _updateInput();
-              highlightAmPm();
             } else if (newAmPm == 'p' || newAmPm == _ampms[1].toLowerCase()[0]) {
-              if (_hour! < 12 || _hour == 0)
+              if (_hour! < 12)
                 toggleAmPm();
-              _updateInput();
-              highlightAmPm();
-            } else {
-              _updateInput();
-              highlightAmPm();
             }
-          } else {
+
+            _updateInput();
+            highlightAmPm();
           }
         }
         break;
